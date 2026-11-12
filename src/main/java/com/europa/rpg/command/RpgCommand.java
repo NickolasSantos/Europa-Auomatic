@@ -55,6 +55,15 @@ public final class RpgCommand {
                 .then(literal("patron").then(argument("patron", StringArgumentType.word())
                         .suggests((c, b) -> CommandSource.suggestMatching(Patron.all().stream().map(Patron::id), b))
                         .executes(ctx -> bool(Blessings.pledge(p(ctx), StringArgumentType.getString(ctx, "patron"))))))
+                .then(literal("race").then(argument("race", StringArgumentType.word())
+                        .suggests((c, b) -> CommandSource.suggestMatching(com.europa.rpg.race.Race.all().stream().map(com.europa.rpg.race.Race::id), b))
+                        .executes(ctx -> bool(RpgActions.chooseRace(p(ctx), StringArgumentType.getString(ctx, "race"))))))
+                .then(literal("shop")
+                        .executes(ctx -> { com.europa.rpg.economy.Market.showShop(p(ctx)); return 1; })
+                        .then(literal("buy").then(argument("offer", StringArgumentType.word())
+                                .suggests((c, b) -> CommandSource.suggestMatching(com.europa.rpg.economy.Market.OFFERS.stream().map(com.europa.rpg.economy.Market.Offer::id), b))
+                                .executes(ctx -> bool(com.europa.rpg.economy.Market.buy(p(ctx), StringArgumentType.getString(ctx, "offer"))))))
+                        .then(literal("price").executes(ctx -> { com.europa.rpg.economy.Market.showPrice(p(ctx), p(ctx).getMainHandStack()); return 1; })))
                 .then(literal("stats").executes(RpgCommand::stats))
                 .then(literal("quest")
                         .executes(ctx -> { QuestManager.showBoard(p(ctx)); return 1; })
@@ -93,6 +102,21 @@ public final class RpgCommand {
                                     Progression.applyAttributes(t);
                                     return ok(ctx);
                                 }))))
+                        .then(literal("addrep").then(argument("target", EntityArgumentType.player())
+                                .then(argument("faction", StringArgumentType.word())
+                                        .suggests((c, b) -> CommandSource.suggestMatching(com.europa.rpg.economy.Factions.ALL.stream().map(com.europa.rpg.economy.Factions.Faction::id), b))
+                                        .then(argument("amount", IntegerArgumentType.integer(1)).executes(ctx -> {
+                                            com.europa.rpg.economy.Factions.addRep(EntityArgumentType.getPlayer(ctx, "target"),
+                                                    StringArgumentType.getString(ctx, "faction"), IntegerArgumentType.getInteger(ctx, "amount"));
+                                            return ok(ctx);
+                                        })))))
+                        .then(literal("rarity").then(argument("tier", IntegerArgumentType.integer(0, 6)).executes(ctx -> {
+                            var stack = p(ctx).getMainHandStack();
+                            var data = stack.get(net.minecraft.component.DataComponentTypes.CUSTOM_DATA);
+                            if (data != null) stack.remove(net.minecraft.component.DataComponentTypes.CUSTOM_DATA);
+                            com.europa.rpg.item.RarityRoller.apply(stack, com.europa.rpg.item.Rarity.values()[IntegerArgumentType.getInteger(ctx, "tier")], p(ctx).getRandom());
+                            return ok(ctx);
+                        })))
                         .then(literal("reset").then(argument("target", EntityArgumentType.player()).executes(ctx -> {
                             ServerPlayerEntity t = EntityArgumentType.getPlayer(ctx, "target");
                             t.setAttached(RpgAttachments.PLAYER_DATA, new PlayerRpgData());

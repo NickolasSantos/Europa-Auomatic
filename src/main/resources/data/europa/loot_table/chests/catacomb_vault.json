@@ -17,22 +17,66 @@
         {
           "type": "minecraft:item",
           "name": "europa:flamebrand",
-          "weight": 3
+          "weight": 3,
+          "functions": [
+            {
+              "function": "europa:roll_rarity",
+              "min_tier": 3
+            }
+          ]
         },
         {
           "type": "minecraft:item",
           "name": "europa:frostfang",
-          "weight": 3
+          "weight": 3,
+          "functions": [
+            {
+              "function": "europa:roll_rarity",
+              "min_tier": 3
+            }
+          ]
         },
         {
           "type": "minecraft:item",
           "name": "europa:stormbreaker",
-          "weight": 2
+          "weight": 2,
+          "functions": [
+            {
+              "function": "europa:roll_rarity",
+              "min_tier": 3
+            }
+          ]
         },
         {
           "type": "minecraft:item",
           "name": "europa:arcane_staff",
-          "weight": 3
+          "weight": 3,
+          "functions": [
+            {
+              "function": "europa:roll_rarity",
+              "min_tier": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "europa:aster_fragment",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 10,
+                "max": 25
+              }
+            }
+          ]
         }
       ]
     },

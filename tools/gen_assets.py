@@ -511,6 +511,64 @@ def servant_texture():
     return img
 
 
+STAR = [
+    "................",
+    ".......oo.......",
+    ".......obo......",
+    "......obbo......",
+    "..oooobbmmoooo..",
+    "..ombbbbmmmmmo..",
+    "...ommbbmmmmo...",
+    "....ommmmmmo....",
+    "....ommmmmmo....",
+    "...ommmoommmo...",
+    "...ommo..ommo...",
+    "..ooo......ooo..",
+    "................",
+    "................",
+    "................",
+    "................",
+]
+PRISM = [
+    "................",
+    ".......oo.......",
+    "......obbo......",
+    ".....obbbmo.....",
+    "....obbbmmmo....",
+    "...obbbmmmmmo...",
+    "..obbbmmmmmmmo..",
+    "..obbmmmmmmmdo..",
+    "..obmmmmmmmddo..",
+    "...ommmmmmddo...",
+    "....ommmmddo....",
+    ".....ommddo.....",
+    "......oddo......",
+    ".......oo.......",
+    "................",
+    "................",
+]
+
+
+def counter_top():
+    img = planks_tex(51, "#6b4a2b")
+    for x in range(16):
+        img.putpixel((x, 0), hexc("#3a2615")); img.putpixel((x, 15), hexc("#3a2615"))
+    for (x, y) in [(4, 5), (5, 5), (4, 6), (5, 6), (10, 9), (11, 9), (10, 10), (11, 10)]:
+        img.putpixel((x, y), hexc("#ffd84d"))
+    return img
+
+
+def counter_side():
+    img = planks_tex(52, "#5a3d22")
+    for y in range(16):
+        img.putpixel((0, y), hexc("#3a2615")); img.putpixel((15, y), hexc("#3a2615"))
+    for x in range(2, 14):
+        img.putpixel((x, 4), hexc("#c9a227"))
+    for (x, y) in [(7, 8), (8, 8), (7, 9), (8, 9)]:
+        img.putpixel((x, y), hexc("#ffd84d"))
+    return img
+
+
 def save(img, *path):
     p = os.path.join(ASSETS, "textures", *path)
     os.makedirs(os.path.dirname(p), exist_ok=True)
@@ -565,6 +623,10 @@ def gen_textures():
     save(boss_texture(), "entity", "catacomb_lord.png")
     save(servant_texture(), "entity", "servant.png")
     save(shrine_top(), "block", "shrine_top.png")
+    save(from_template(STAR, pal({"o": "#3a2a6b", "b": "#fff6c2", "m": "#b98cff"})), "item", "aster_fragment.png")
+    save(from_template(PRISM, pal({"o": "#2a1f5a", "b": "#f4ecff", "m": "#9b7bff", "d": "#5a3fb8"})), "item", "aster_prism.png")
+    save(counter_top(), "block", "merchant_counter_top.png")
+    save(counter_side(), "block", "merchant_counter_side.png")
     save(shrine_side(), "block", "shrine_side.png")
     save(noise_tex(hexc("#6a6a6a"), 0.07, 43), "block", "shrine_bottom.png")
 
@@ -578,7 +640,7 @@ def gen_textures():
 # ----------------------------------------------------------------------------- modelos / blockstates
 
 SIMPLE_BLOCKS = ["mithril_ore", "deepslate_mithril_ore", "adamantite_ore", "soulstone_ore", "mithril_block", "adamantite_block"]
-GENERATED_ITEMS = ["raw_mithril", "mithril_ingot", "raw_adamantite", "adamantite_ingot", "soul_shard", "catacomb_key", "rebirth_tome",
+GENERATED_ITEMS = ["aster_fragment", "aster_prism", "raw_mithril", "mithril_ingot", "raw_adamantite", "adamantite_ingot", "soul_shard", "catacomb_key", "rebirth_tome",
                    "mithril_helmet", "mithril_chestplate", "mithril_leggings", "mithril_boots",
                    "adamantite_helmet", "adamantite_chestplate", "adamantite_leggings", "adamantite_boots"]
 HANDHELD_ITEMS = ["mithril_sword", "mithril_pickaxe", "mithril_axe", "mithril_shovel",
@@ -612,6 +674,10 @@ def gen_models():
         "top": f"{MOD}:block/shrine_top", "side": f"{MOD}:block/shrine_side", "bottom": f"{MOD}:block/shrine_bottom"}})
     write_json(os.path.join(bs, "shrine.json"), {"variants": {"": {"model": f"{MOD}:block/shrine"}}})
     write_json(os.path.join(im, "shrine.json"), {"parent": f"{MOD}:block/shrine"})
+    write_json(os.path.join(bm, "merchant_counter.json"), {"parent": "minecraft:block/cube_bottom_top", "textures": {
+        "top": f"{MOD}:block/merchant_counter_top", "side": f"{MOD}:block/merchant_counter_side", "bottom": "minecraft:block/spruce_planks"}})
+    write_json(os.path.join(bs, "merchant_counter.json"), {"variants": {"": {"model": f"{MOD}:block/merchant_counter"}}})
+    write_json(os.path.join(im, "merchant_counter.json"), {"parent": f"{MOD}:block/merchant_counter"})
 
     for i in GENERATED_ITEMS:
         write_json(os.path.join(im, i + ".json"), {"parent": "minecraft:item/generated", "textures": {"layer0": f"{MOD}:item/{i}"}})
@@ -672,6 +738,9 @@ def gen_recipes():
     shaped("catacomb_key", [" S ", "SAS", " G "], {"S": "soul_shard", "A": "adamantite_ingot", "G": "minecraft:gold_ingot"}, "catacomb_key")
     shaped("shrine", ["GAG", "SCS", "SSS"], {"G": "minecraft:gold_ingot", "A": "minecraft:amethyst_shard",
                                               "C": "minecraft:candle", "S": "minecraft:stone_bricks"}, "shrine")
+    shaped("merchant_counter", ["GEG", "PPP", "P P"], {"G": "minecraft:gold_ingot", "E": "minecraft:emerald", "P": "minecraft:spruce_planks"}, "merchant_counter")
+    shaped("aster_prism", ["###", "###", "###"], {"#": "aster_fragment"}, "aster_prism")
+    shapeless("aster_fragment_from_prism", ["aster_prism"], "aster_fragment", 9)
     shaped("rebirth_tome", [" S ", "SBS", " D "], {"S": "soul_shard", "B": "minecraft:book", "D": "minecraft:diamond"}, "rebirth_tome")
     # Quadro de missões aceita qualquer tábua (tag)
     p = os.path.join(DATA, "recipe", "quest_board.json")
@@ -702,9 +771,11 @@ def self_loot(block):
                                                   "entries": [{"type": "minecraft:item", "name": f"{MOD}:{block}"}]}]}
 
 
-def entry(name, weight, lo=1, hi=1, enchant=False):
+def entry(name, weight, lo=1, hi=1, enchant=False, rarity=None):
     e = {"type": "minecraft:item", "name": name if ":" in name else f"{MOD}:{name}", "weight": weight}
     fns = []
+    if rarity is not None:
+        fns.append({"function": f"{MOD}:roll_rarity", "min_tier": rarity})
     if (lo, hi) != (1, 1):
         fns.append({"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": lo, "max": hi}})
     if enchant:
@@ -720,7 +791,7 @@ def gen_loot():
     write_json(os.path.join(lt, "blocks", "deepslate_mithril_ore.json"), ore_loot("deepslate_mithril_ore", "raw_mithril"))
     write_json(os.path.join(lt, "blocks", "adamantite_ore.json"), ore_loot("adamantite_ore", "raw_adamantite"))
     write_json(os.path.join(lt, "blocks", "soulstone_ore.json"), ore_loot("soulstone_ore", "soul_shard", 1, 2))
-    for b in ["mithril_block", "adamantite_block", "quest_board", "shrine"]:
+    for b in ["mithril_block", "adamantite_block", "quest_board", "shrine", "merchant_counter"]:
         write_json(os.path.join(lt, "blocks", b + ".json"), self_loot(b))
 
     room = {"type": "minecraft:chest", "pools": [
@@ -731,22 +802,24 @@ def gen_loot():
             entry("minecraft:experience_bottle", 6, 2, 5), entry("minecraft:book", 5, 1, 1, enchant=True)]},
         {"rolls": 1, "entries": [
             {"type": "minecraft:empty", "weight": 55},
-            entry("mithril_sword", 10, enchant=True), entry("mithril_helmet", 6), entry("mithril_chestplate", 5),
-            entry("adamantite_ingot", 8, 1, 2), entry("catacomb_key", 6), entry("flamebrand", 2), entry("frostfang", 2),
-            entry("rebirth_tome", 3), entry("arcane_staff", 2)]}]}
+            entry("mithril_sword", 10, enchant=True, rarity=1), entry("mithril_helmet", 6, rarity=1), entry("mithril_chestplate", 5, rarity=1),
+            entry("adamantite_ingot", 8, 1, 2), entry("catacomb_key", 6), entry("flamebrand", 2, rarity=3), entry("frostfang", 2, rarity=3),
+            entry("rebirth_tome", 3), entry("arcane_staff", 2, rarity=3), entry("aster_fragment", 8, 3, 10)]}]}
     write_json(os.path.join(lt, "chests", "catacomb_room.json"), room)
 
     vault = {"type": "minecraft:chest", "pools": [
         {"rolls": 1, "entries": [entry("catacomb_key", 1)]},
-        {"rolls": 1, "entries": [entry("flamebrand", 3), entry("frostfang", 3), entry("stormbreaker", 2), entry("arcane_staff", 3)]},
+        {"rolls": 1, "entries": [entry("flamebrand", 3, rarity=3), entry("frostfang", 3, rarity=3), entry("stormbreaker", 2, rarity=3), entry("arcane_staff", 3, rarity=3)]},
+        {"rolls": 1, "entries": [entry("aster_fragment", 1, 10, 25)]},
         {"rolls": {"type": "minecraft:uniform", "min": 3, "max": 5}, "entries": [
             entry("adamantite_ingot", 10, 1, 3), entry("mithril_ingot", 12, 2, 5), entry("soul_shard", 10, 2, 4),
             entry("minecraft:diamond", 6, 1, 3), entry("minecraft:enchanted_golden_apple", 1), entry("minecraft:golden_apple", 5, 1, 2)]}]}
     write_json(os.path.join(lt, "chests", "catacomb_vault.json"), vault)
 
     boss = {"type": "minecraft:entity", "pools": [
-        {"rolls": 1, "entries": [entry("soulreaper", 1)], "conditions": [{"condition": "minecraft:killed_by_player"}]},
-        {"rolls": 1, "entries": [entry("stormbreaker", 1), entry("flamebrand", 1), entry("frostfang", 1), entry("arcane_staff", 1)],
+        {"rolls": 1, "entries": [entry("soulreaper", 1, rarity=4)], "conditions": [{"condition": "minecraft:killed_by_player"}]},
+        {"rolls": 1, "entries": [entry("aster_prism", 1, 4, 8)]},
+        {"rolls": 1, "entries": [entry("stormbreaker", 1, rarity=4), entry("flamebrand", 1, rarity=4), entry("frostfang", 1, rarity=4), entry("arcane_staff", 1, rarity=4)],
          "conditions": [{"condition": "minecraft:random_chance", "chance": 0.5}]},
         {"rolls": 1, "entries": [entry("adamantite_ingot", 1, 3, 6)]},
         {"rolls": 1, "entries": [entry("soul_shard", 1, 4, 8)]},
@@ -764,7 +837,7 @@ def gen_tags():
     m = lambda *xs: [f"{MOD}:{x}" for x in xs]
     tb = os.path.join(MCDATA, "tags", "block")
     tag(os.path.join(tb, "mineable", "pickaxe.json"), m("mithril_ore", "deepslate_mithril_ore", "adamantite_ore", "soulstone_ore", "mithril_block", "adamantite_block", "shrine"))
-    tag(os.path.join(tb, "mineable", "axe.json"), m("quest_board"))
+    tag(os.path.join(tb, "mineable", "axe.json"), m("quest_board", "merchant_counter"))
     tag(os.path.join(tb, "needs_iron_tool.json"), m("mithril_ore", "deepslate_mithril_ore", "soulstone_ore", "mithril_block"))
     tag(os.path.join(tb, "needs_diamond_tool.json"), m("adamantite_ore", "adamantite_block"))
     tag(os.path.join(tb, "dragon_immune.json"), m("boss_altar"))

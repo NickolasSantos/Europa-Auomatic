@@ -11,7 +11,7 @@ public final class ClientRpgState {
     public static PlayerRpgData full = new PlayerRpgData();
     /** Incrementado a cada sincronização completa; a tela usa para se reconstruir. */
     public static int version;
-    public static int primaryCd, ultimateCd;
+    public static int primaryCd, ultimateCd, racialCd;
 
     private ClientRpgState() {}
 
@@ -19,6 +19,7 @@ public final class ClientRpgState {
         data = p;
         primaryCd = p.primaryCd();
         ultimateCd = p.ultimateCd();
+        racialCd = p.racialCd();
         full.mana = p.mana();
     }
 
@@ -32,6 +33,7 @@ public final class ClientRpgState {
     public static void tick() {
         if (primaryCd > 0) primaryCd--;
         if (ultimateCd > 0) ultimateCd--;
+        if (racialCd > 0) racialCd--;
     }
 
     public static void reset() {

@@ -45,6 +45,8 @@ public class EuropaRPG implements ModInitializer {
     @Override
     public void onInitialize() {
         RpgAttachments.init();
+        com.europa.rpg.content.ClassCatalog.init();
+        com.europa.rpg.race.Races.init();
         ModEntities.init();
         ModArmorMaterials.init();
         ModBlocks.init();
@@ -55,12 +57,16 @@ public class EuropaRPG implements ModInitializer {
         ModNetworking.init();
         CombatHooks.init();
         Professions.init();
+        com.europa.rpg.ability.Summons.init();
+        com.europa.rpg.item.RollRarityLootFunction.init();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, env) -> RpgCommand.register(dispatcher));
 
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             TaskScheduler.tick(server);
             long now = server.getOverworld().getTime();
+            if (now % 1200 == 0) com.europa.rpg.economy.MarketState.get(server).decay();
+            if (now % 200 == 0) CombatHooks.cleanupMarks(now);
             for (ServerPlayerEntity p : server.getPlayerManager().getPlayerList()) Progression.tick(p, now);
         });
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> TaskScheduler.clear());
@@ -74,6 +80,7 @@ public class EuropaRPG implements ModInitializer {
         });
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             Progression.forget(handler.getPlayer());
+            com.europa.rpg.race.Races.forget(handler.getPlayer());
             Professions.forget(handler.getPlayer());
         });
         ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
@@ -91,6 +98,8 @@ public class EuropaRPG implements ModInitializer {
                         entity.getBoundingBox().expand(32), x -> true)) {
                     Progression.addXp(p, 1500);
                     QuestManager.onKill(p, entity);
+                    com.europa.rpg.economy.Factions.addRep(p, "wanderers", 300);
+                    com.europa.rpg.economy.Factions.addRep(p, "nameless", 100);
                 }
                 return;
             }
@@ -98,6 +107,9 @@ public class EuropaRPG implements ModInitializer {
             if (killer == null) return;
             Progression.addXp(killer, xpFor(entity));
             QuestManager.onKill(killer, entity);
+            Professions.onKill(killer, entity);
+            Progression.gain(killer, com.europa.rpg.rpg.Resource.SPIRIT, 10f);
+            if (entity.getType().isIn(net.minecraft.registry.tag.EntityTypeTags.UNDEAD)) Progression.gain(killer, com.europa.rpg.rpg.Resource.FAITH, 5f);
         });
 
         LOGGER.info("Europa RPG carregado.");

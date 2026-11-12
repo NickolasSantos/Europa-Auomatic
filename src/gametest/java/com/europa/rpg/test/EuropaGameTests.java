@@ -43,15 +43,15 @@ public class EuropaGameTests implements FabricGameTest {
         ServerPlayerEntity p = player(ctx);
         run(p, "europa class warrior");
         PlayerRpgData d = RpgAttachments.get(p);
-        ctx.assertTrue(d.rpgClass == RpgClass.WARRIOR, "classe deveria ser guerreiro, é " + d.rpgClass);
+        ctx.assertTrue(d.rpgClass == RpgClass.byId("warrior"), "classe deveria ser guerreiro, é " + d.rpgClass);
         ctx.assertTrue(p.getMaxHealth() == 24f, "vida máxima esperada 24, obtida " + p.getMaxHealth());
 
         // Não pode trocar de classe sem o tomo
         run(p, "europa class mage");
-        ctx.assertTrue(d.rpgClass == RpgClass.WARRIOR, "troca de classe sem tomo deveria falhar");
+        ctx.assertTrue(d.rpgClass == RpgClass.byId("warrior"), "troca de classe sem tomo deveria falhar");
 
         // Subclasse bloqueada antes do nível 10
-        run(p, "europa subclass berserker");
+        run(p, "europa subclass guardian");
         ctx.assertTrue(d.subclass == RpgSubclass.NONE, "subclasse não deveria ser liberada no nível 1");
 
         Progression.addXp(p, Progression.xpForNextLevel(1));
@@ -60,10 +60,10 @@ public class EuropaGameTests implements FabricGameTest {
         run(p, "europa admin setlevel @s 10");
         ctx.assertTrue(d.level == 10, "setlevel falhou");
         run(p, "europa subclass mage_is_not_valid");
-        run(p, "europa subclass pyromancer");
+        run(p, "europa subclass elementalist");
         ctx.assertTrue(d.subclass == RpgSubclass.NONE, "subclasse de outra classe deveria falhar");
-        run(p, "europa subclass berserker");
-        ctx.assertTrue(d.subclass == RpgSubclass.BERSERKER, "subclasse deveria ser berserker");
+        run(p, "europa subclass guardian");
+        ctx.assertTrue(d.subclass == RpgSubclass.byId("guardian"), "subclasse deveria ser guardião");
 
         // Tomo do renascimento
         p.setStackInHand(Hand.MAIN_HAND, new ItemStack(ModItems.REBIRTH_TOME));
@@ -78,9 +78,11 @@ public class EuropaGameTests implements FabricGameTest {
         ServerPlayerEntity p = player(ctx);
         PlayerRpgData d = RpgAttachments.get(p);
         d.level = 20;
-        ctx.assertTrue(RpgClass.all().size() == 12 && RpgSubclass.all().size() == 24, "esperadas 12 classes e 24 subclasses");
+        ctx.assertTrue(RpgClass.all().size() == 32 && RpgSubclass.all().size() == 96, "esperadas 32 classes e 96 subclasses");
         for (RpgSubclass sub : RpgSubclass.all()) {
             ctx.getWorld().getEntitiesByClass(ZombieEntity.class, p.getBoundingBox().expand(60), e -> true).forEach(e -> e.discard());
+            ctx.getWorld().getEntitiesByClass(net.minecraft.entity.mob.MobEntity.class, p.getBoundingBox().expand(60),
+                    e -> e.getCommandTags().contains(com.europa.rpg.ability.Summons.TAG)).forEach(e -> e.discard());
             ZombieEntity zombie = ctx.spawnMob(EntityType.ZOMBIE, new BlockPos(4, 1, 4));
             ctx.spawnMob(EntityType.ZOMBIE, new BlockPos(5, 1, 3)).setAiDisabled(true);
             zombie.setAiDisabled(true);
@@ -133,7 +135,7 @@ public class EuropaGameTests implements FabricGameTest {
         ctx.assertTrue(d.completedQuests.contains("mithril_prospector"), "missão de coleta não concluiu");
         ctx.assertTrue(p.getInventory().count(ModItems.RAW_MITHRIL) == 7, "deveria consumir só 3 restantes, sobrou " + p.getInventory().count(ModItems.RAW_MITHRIL));
         ctx.assertTrue(p.getInventory().count(ModItems.MITHRIL_PICKAXE) == 1, "picareta de recompensa ausente");
-        ctx.assertTrue(Quests.ALL.size() == 10, "deveriam existir 10 missões");
+        ctx.assertTrue(Quests.ALL.size() == 18, "deveriam existir 18 missões (10 + 8 contratos)");
         ctx.complete();
     }
 
@@ -212,8 +214,8 @@ public class EuropaGameTests implements FabricGameTest {
         com.europa.rpg.blessing.Blessings.tick(p, d, 20);
         ctx.assertTrue(p.hasStatusEffect(net.minecraft.entity.effect.StatusEffects.HASTE), "Thalor tier 1 deveria dar Pressa");
         // Trocar de patrono zera o favor
-        ctx.assertTrue(com.europa.rpg.blessing.Blessings.pledge(p, "kaelith"), "troca de patrono");
-        ctx.assertTrue(d.favor == 0 && "kaelith".equals(d.patron), "troca deveria zerar o favor");
+        ctx.assertTrue(com.europa.rpg.blessing.Blessings.pledge(p, "tharion"), "troca de patrono");
+        ctx.assertTrue(d.favor == 0 && "tharion".equals(d.patron), "troca deveria zerar o favor");
         ctx.complete();
     }
 
@@ -221,7 +223,7 @@ public class EuropaGameTests implements FabricGameTest {
     public void professionsAndSync(TestContext ctx) {
         ServerPlayerEntity p = player(ctx);
         PlayerRpgData d = RpgAttachments.get(p);
-        var mining = com.europa.rpg.profession.Profession.MINING;
+        var mining = com.europa.rpg.profession.Profession.ANOMALY_GEOLOGIST;
         com.europa.rpg.profession.Professions.addXp(p, mining, com.europa.rpg.profession.Profession.xpForNext(1) + com.europa.rpg.profession.Profession.xpForNext(2));
         ctx.assertTrue(com.europa.rpg.profession.Professions.level(d, mining) == 3, "mineração deveria estar no nível 3");
 
@@ -238,8 +240,111 @@ public class EuropaGameTests implements FabricGameTest {
         d.favor = 321;
         var nbt = PlayerRpgData.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, d).getOrThrow();
         PlayerRpgData back = PlayerRpgData.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, nbt).getOrThrow();
-        ctx.assertTrue(back.rpgClass == RpgClass.BARD && back.talents.get("flow") == 3 && back.favor == 321
-                && "ysmera".equals(back.patron) && back.profLevels.get("mining") == 3, "codec não preservou o estado");
+        ctx.assertTrue(back.rpgClass == RpgClass.byId("bard") && back.talents.get("flow") == 3 && back.favor == 321
+                && "ysmera".equals(back.patron) && back.profLevels.get("anomaly_geologist") == 3, "codec não preservou o estado");
+        ctx.complete();
+    }
+
+    @GameTest(templateName = EMPTY_STRUCTURE, tickLimit = 100)
+    public void racesAndResources(TestContext ctx) {
+        ServerPlayerEntity p = player(ctx);
+        PlayerRpgData d = RpgAttachments.get(p);
+        ctx.assertTrue(com.europa.rpg.race.Race.all().size() == 18, "esperadas 18 raças");
+        float hp = p.getMaxHealth();
+        ctx.assertTrue(com.europa.rpg.rpg.RpgActions.chooseRace(p, "dwarf"), "escolher anão");
+        ctx.assertFalse(com.europa.rpg.rpg.RpgActions.chooseRace(p, "elf"), "segunda raça deveria falhar");
+        ctx.assertTrue(Math.abs(p.getScale() - 0.85f) < 0.01f, "escala do anão deveria ser 0.85, é " + p.getScale());
+        ctx.assertTrue(p.getMaxHealth() == hp + 4, "anão deveria ter +4 de vida");
+
+        // Todas as habilidades raciais executam
+        for (com.europa.rpg.race.Race r : com.europa.rpg.race.Race.all()) {
+            d.race = r.id();
+            d.cooldowns.clear();
+            long now = p.getServer().getOverworld().getTime();
+            com.europa.rpg.ability.AbilityHandler.tryCast(p, com.europa.rpg.ability.AbilityHandler.RACIAL);
+            ctx.assertTrue(d.cooldownRemaining("racial", now) > 0, "habilidade racial não executou: " + r.id());
+        }
+
+        // Recursos por classe
+        run(p, "europa class barbarian");
+        ctx.assertTrue(com.europa.rpg.rpg.Progression.resource(d) == com.europa.rpg.rpg.Resource.FURY, "bárbaro usa Fúria");
+        ctx.assertTrue(d.mana == 0, "Fúria começa vazia");
+        com.europa.rpg.rpg.Progression.gain(p, com.europa.rpg.rpg.Resource.FURY, 6f);
+        ctx.assertTrue(d.mana == 6f, "Fúria deveria subir para 6");
+        p.setAttached(RpgAttachments.PLAYER_DATA, new PlayerRpgData());
+        d = RpgAttachments.get(p);
+        run(p, "europa class rogue");
+        var step = com.europa.rpg.ability.Abilities.get("shadow_step");
+        ctx.assertTrue(com.europa.rpg.rpg.Progression.maxMana(d) == 5f, "Oportunidade tem 5 pontos");
+        ctx.assertTrue(com.europa.rpg.ability.AbilityHandler.effectiveCost(d, step) == 2, "Passo Sombrio custa 2 de Oportunidade");
+
+        // Catálogo traduzido no servidor (en_us carregado pelo Fabric)
+        var lang = net.minecraft.util.Language.getInstance();
+        for (RpgClass c : RpgClass.all()) ctx.assertTrue(lang.hasTranslation(c.translationKey()), "sem tradução: " + c.id);
+        for (RpgSubclass sc : RpgSubclass.all()) ctx.assertTrue(lang.hasTranslation(sc.translationKey()), "sem tradução: " + sc.id);
+        ctx.complete();
+    }
+
+    @GameTest(templateName = EMPTY_STRUCTURE)
+    public void rarityEconomyAndFactions(TestContext ctx) {
+        ServerPlayerEntity p = player(ctx);
+        PlayerRpgData d = RpgAttachments.get(p);
+        var random = p.getRandom();
+
+        ItemStack sword = new ItemStack(net.minecraft.item.Items.DIAMOND_SWORD);
+        com.europa.rpg.item.RarityRoller.apply(sword, com.europa.rpg.item.Rarity.LEGENDARY, random);
+        ctx.assertTrue(com.europa.rpg.item.RarityRoller.rarityOf(sword) == com.europa.rpg.item.Rarity.LEGENDARY, "raridade gravada");
+        var mods = sword.get(net.minecraft.component.DataComponentTypes.ATTRIBUTE_MODIFIERS);
+        long base = mods.modifiers().stream().filter(m -> m.modifier().id().getNamespace().equals("minecraft")).count();
+        ctx.assertTrue(base >= 2, "modificadores base da espada deveriam ser preservados");
+        ItemStack again = sword.copy();
+        com.europa.rpg.item.RarityRoller.roll(again, random, 0);
+        ctx.assertTrue(com.europa.rpg.item.RarityRoller.rarityOf(again) == com.europa.rpg.item.Rarity.LEGENDARY, "não deveria re-sortear");
+
+        // Mercado: preço cai com a oferta (estado persiste entre execuções; isola o teste)
+        com.europa.rpg.economy.MarketState.get(p.getServer()).pressure.clear();
+        ItemStack diamonds = new ItemStack(net.minecraft.item.Items.DIAMOND, 10);
+        int first = com.europa.rpg.economy.Market.sell(p, diamonds, true);
+        ctx.assertTrue(first >= 70 && diamonds.isEmpty(), "venda de 10 diamantes deveria render ~80, rendeu " + first);
+        int second = com.europa.rpg.economy.Market.sell(p, new ItemStack(net.minecraft.item.Items.DIAMOND, 10), true);
+        ctx.assertTrue(second < first, "segunda venda deveria valer menos (" + second + " >= " + first + ")");
+        int balance = com.europa.rpg.economy.Market.balance(p);
+        ctx.assertTrue(balance == first + second, "saldo deveria somar as vendas");
+        ctx.assertTrue(com.europa.rpg.economy.Market.buy(p, "bread"), "comprar pão");
+        ctx.assertTrue(com.europa.rpg.economy.Market.balance(p) == balance - 8, "compra deveria debitar 8 com troco correto");
+
+        // Facções: loja travada por reputação
+        ctx.assertFalse(com.europa.rpg.economy.Market.buy(p, "wan_key"), "chave exige Honrado");
+        com.europa.rpg.economy.Factions.addRep(p, "wanderers", 1000);
+        ctx.assertTrue(com.europa.rpg.economy.Factions.rank(com.europa.rpg.economy.Factions.rep(d, "wanderers")) == 2, "1000 = Honrado");
+        com.europa.rpg.economy.Market.give(p, 200);
+        ctx.assertTrue(com.europa.rpg.economy.Market.buy(p, "wan_key"), "comprar chave com Honrado");
+        ctx.assertTrue(p.getInventory().count(ModItems.CATACOMB_KEY) == 1, "chave entregue");
+
+        // XP de profissão rende reputação
+        int obs = com.europa.rpg.economy.Factions.rep(d, "observatory");
+        com.europa.rpg.profession.Professions.addXp(p, com.europa.rpg.profession.Profession.RUIN_ARCHAEOLOGIST, 100);
+        ctx.assertTrue(com.europa.rpg.economy.Factions.rep(d, "observatory") >= obs + 20, "arqueologia deveria render reputação no Observatório");
+        ctx.complete();
+    }
+
+    @GameTest(templateName = EMPTY_STRUCTURE)
+    public void legacyDataMigration(TestContext ctx) {
+        var nbt = new net.minecraft.nbt.NbtCompound();
+        nbt.putString("class", "warrior");
+        nbt.putString("patron", "solenne");
+        var prof = new net.minecraft.nbt.NbtCompound();
+        prof.putInt("mining", 7);
+        prof.putInt("woodcutting", 3);
+        prof.putInt("farming", 9);
+        nbt.put("prof_levels", prof);
+        PlayerRpgData d = PlayerRpgData.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, nbt).getOrThrow();
+        ctx.assertTrue("aureon".equals(d.patron), "solenne deveria migrar para aureon");
+        ctx.assertTrue(d.profLevels.get("anomaly_geologist") == 7, "mining -> anomaly_geologist");
+        ctx.assertTrue(d.profLevels.get("biome_gardener") == 9, "woodcutting/farming -> biome_gardener (maior nível)");
+        var old = new net.minecraft.nbt.NbtCompound();
+        old.putString("class", "runesmith");
+        ctx.assertFalse(PlayerRpgData.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, old).getOrThrow().hasClass(), "classe removida vira 'sem classe'");
         ctx.complete();
     }
 }

@@ -11,6 +11,7 @@ public final class TaskScheduler {
     private record Task(long dueTick, Runnable action) {}
 
     private static final List<Task> TASKS = new ArrayList<>();
+    private static final java.util.Set<java.util.UUID> TRACKED = new java.util.HashSet<>();
     private static long tick;
 
     private TaskScheduler() {}
@@ -35,5 +36,13 @@ public final class TaskScheduler {
 
     public static void clear() {
         TASKS.clear();
+        TRACKED.clear();
     }
+
+    /** Entidades temporárias cujo fim está agendado (para descartá-las se forem recarregadas sem agendamento). */
+    public static void track(java.util.UUID id) { TRACKED.add(id); }
+
+    public static void untrack(java.util.UUID id) { TRACKED.remove(id); }
+
+    public static boolean isTracked(java.util.UUID id) { return TRACKED.contains(id); }
 }

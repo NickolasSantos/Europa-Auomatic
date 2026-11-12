@@ -24,16 +24,32 @@ import net.minecraft.util.Formatting;
 /** Regras de combate dos talentos e bênçãos. */
 public final class CombatHooks {
     private static final int LAST_STAND_COOLDOWN = 120 * 20;
+    /** Alvos marcados: uuid -> (tick final, bônus de dano recebido). */
+    private record Mark(long until, float bonus) {}
+    private static final java.util.Map<java.util.UUID, Mark> MARKS = new java.util.HashMap<>();
+
+    public static void mark(LivingEntity target, float bonus, int ticks) {
+        if (target.getServer() == null) return;
+        long now = target.getServer().getOverworld().getTime();
+        MARKS.put(target.getUuid(), new Mark(now + ticks, bonus));
+    }
+
+    public static void cleanupMarks(long now) {
+        MARKS.values().removeIf(m -> m.until < now);
+    }
 
     private CombatHooks() {}
 
     /** Ajusta o dano antes de ser aplicado (mixin em LivingEntity#damage). */
     public static float modifyIncoming(LivingEntity target, DamageSource source, float amount) {
         if (target.getWorld().isClient() || amount <= 0) return amount;
+        if (target instanceof ServerPlayerEntity victim) amount *= com.europa.rpg.race.Races.incomingMultiplier(RpgAttachments.get(victim), source);
         if (!(source.getAttacker() instanceof ServerPlayerEntity p) || p == target) return amount;
         PlayerRpgData d = RpgAttachments.get(p);
         float result = amount;
-        double crit = Talents.total(d, TalentEffect.CRIT_CHANCE);
+        com.europa.rpg.race.Race race = com.europa.rpg.race.Races.of(d);
+        double crit = Talents.total(d, TalentEffect.CRIT_CHANCE) + Blessings.critBonus(d)
+                + com.europa.rpg.item.RarityRoller.equipped(p, "crit") + (race == null ? 0 : race.traits().crit());
         if (crit > 0 && p.getRandom().nextDouble() < crit) {
             result *= 1.5f;
             if (target.getWorld() instanceof ServerWorld w) {
@@ -43,6 +59,9 @@ public final class CombatHooks {
         double execute = Talents.total(d, TalentEffect.EXECUTE);
         if (execute > 0 && target.getHealth() < target.getMaxHealth() * 0.3f) result *= (float) (1 + execute);
         result *= Blessings.damageMultiplier(p, d, target);
+        result *= com.europa.rpg.race.Races.damageMultiplier(p, d);
+        Mark m = MARKS.get(target.getUuid());
+        if (m != null && m.until >= p.getServer().getOverworld().getTime()) result *= 1 + m.bonus;
         return result;
     }
 
@@ -50,17 +69,24 @@ public final class CombatHooks {
         ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
             // Kaelith tier 2: imunidade a dano de queda.
             if (entity instanceof ServerPlayerEntity p && source.isOf(DamageTypes.FALL)
-                    && Blessings.has(RpgAttachments.get(p), Patron.KAELITH, 2)) return false;
+                    && Blessings.has(RpgAttachments.get(p), Patron.THARION, 2)) return false;
             return true;
         });
 
         ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseTaken, taken, blocked) -> {
+            if (entity instanceof ServerPlayerEntity victim && taken > 0) {
+                Progression.markCombat(victim);
+                Progression.gain(victim, com.europa.rpg.rpg.Resource.FURY, 4f);
+            }
             if (taken <= 0 || !(source.getAttacker() instanceof ServerPlayerEntity p) || p == entity) return;
             PlayerRpgData d = RpgAttachments.get(p);
-            double lifesteal = Talents.total(d, TalentEffect.LIFESTEAL);
+            Progression.markCombat(p);
+            Progression.gain(p, com.europa.rpg.rpg.Resource.FURY, 6f);
+            Progression.gain(p, com.europa.rpg.rpg.Resource.OPPORTUNITY, 1f);
+            double lifesteal = Talents.total(d, TalentEffect.LIFESTEAL) + com.europa.rpg.item.RarityRoller.equipped(p, "lifesteal");
             if (lifesteal > 0) p.heal((float) (taken * lifesteal));
             // Kaelith tier 3: raio em golpes corpo a corpo.
-            if (source.getSource() == p && Blessings.has(d, Patron.KAELITH, 3) && p.getRandom().nextFloat() < 0.15f
+            if (source.getSource() == p && Blessings.has(d, Patron.THARION, 3) && p.getRandom().nextFloat() < 0.15f
                     && entity.getWorld() instanceof ServerWorld w) {
                 LightningEntity bolt = EntityType.LIGHTNING_BOLT.create(w);
                 if (bolt != null) {
@@ -71,12 +97,8 @@ public final class CombatHooks {
                 entity.timeUntilRegen = 0;
                 entity.damage(p.getDamageSources().lightningBolt(), 5f);
             }
-            // Servos do necromante atacam o alvo do dono.
-            if (entity.isAlive() && !(entity instanceof ServantEntity)) {
-                for (ServantEntity s : p.getServerWorld().getEntitiesByClass(ServantEntity.class, p.getBoundingBox().expand(24), s -> s.isOwnedBy(p))) {
-                    if (s.getTarget() == null && s.canTarget(entity)) s.setTarget(entity);
-                }
-            }
+            // Invocações atacam o alvo do dono.
+            if (entity.isAlive() && !com.europa.rpg.ability.Summons.isSummonOf(entity, p)) com.europa.rpg.ability.Summons.focus(p, entity);
         });
 
         ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> {

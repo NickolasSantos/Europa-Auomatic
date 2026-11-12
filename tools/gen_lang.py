@@ -393,6 +393,20 @@ L.update({
     "rpg.europa.profession.extra_potion": ("Destilação perfeita: poção extra!", "Perfect distillation: extra potion!"),
 })
 
+
+# Expansão do documento mestre: remove definições antigas de classe/subclasse/patrono/profissão e aplica o conteúdo novo.
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import lang_content
+_drop = ("rpg.europa.class.", "rpg.europa.subclass.", "rpg.europa.patron.", "rpg.europa.profession.")
+_keep_exact = {"rpg.europa.class.none", "rpg.europa.class.none.desc", "rpg.europa.subclass.none", "rpg.europa.subclass.none.desc",
+               "rpg.europa.patron.need_shrine", "rpg.europa.patron.pledged", "rpg.europa.patron.rejected", "rpg.europa.patron.max_favor",
+               "rpg.europa.patron.favor", "rpg.europa.patron.tier_up", "rpg.europa.patron.tier", "rpg.europa.patron.offerings",
+               "rpg.europa.patron.pick_hint", "rpg.europa.patron.none", "rpg.europa.patron.offer_hint",
+               "rpg.europa.profession.level_up", "rpg.europa.profession.masterwork", "rpg.europa.profession.extra_potion"}
+L = {k: v for k, v in L.items() if not k.startswith(_drop) or k in _keep_exact}
+L.update(lang_content.build())
+
 base = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "main", "resources", "assets", "europa", "lang")
 os.makedirs(base, exist_ok=True)
 for idx, lang in enumerate(["pt_br", "en_us"]):

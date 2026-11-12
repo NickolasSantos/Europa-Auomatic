@@ -43,12 +43,24 @@ public final class Blessings {
         ServerWorld w = p.getServerWorld();
         BlockPos pos = p.getBlockPos();
         switch (patron.id()) {
-            case "solenne" -> {
+            case "aureon" -> {
                 if (w.isDay() && w.isSkyVisible(pos)) effect(p, StatusEffects.REGENERATION, 60, 0);
             }
-            case "morvath" -> {
-                effect(p, StatusEffects.NIGHT_VISION, 260, 0);
-                if (tier >= 2 && w.isNight()) effect(p, StatusEffects.STRENGTH, 60, 0);
+            case "tharion" -> effect(p, StatusEffects.SPEED, 60, 0);
+            case "sylvara" -> {
+                if (tier >= 2 && now % 600 == 0) p.getHungerManager().add(1, 0.5f);
+                if (tier >= 3) {
+                    p.removeStatusEffect(StatusEffects.POISON);
+                    p.removeStatusEffect(StatusEffects.WITHER);
+                }
+            }
+            case "nymira" -> {
+                if (tier >= 2 && w.isNight() && p.isSneaking()) effect(p, StatusEffects.INVISIBILITY, 40, 0);
+                if (tier >= 3) {
+                    for (var e : w.getEntitiesByClass(net.minecraft.entity.mob.HostileEntity.class, p.getBoundingBox().expand(16), x -> true)) {
+                        e.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 40, 0, true, false));
+                    }
+                }
             }
             case "thalor" -> {
                 effect(p, StatusEffects.HASTE, 60, 0);
@@ -61,13 +73,12 @@ public final class Blessings {
                     effect(p, StatusEffects.CONDUIT_POWER, 60, 0);
                 }
             }
-            case "kaelith" -> effect(p, StatusEffects.SPEED, 60, 0);
-            case "verdanya" -> {
-                if (tier >= 2 && now % 600 == 0) p.getHungerManager().add(1, 0.5f);
-                if (tier >= 3) {
-                    p.removeStatusEffect(StatusEffects.POISON);
-                    p.removeStatusEffect(StatusEffects.WITHER);
-                }
+            case "morvath" -> {
+                effect(p, StatusEffects.NIGHT_VISION, 260, 0);
+                if (tier >= 2 && w.isNight()) effect(p, StatusEffects.STRENGTH, 60, 0);
+            }
+            case "vaelor" -> {
+                if (tier >= 2 && p.getHealth() < p.getMaxHealth() / 2) effect(p, StatusEffects.STRENGTH, 60, 0);
             }
             default -> {}
         }
@@ -82,10 +93,18 @@ public final class Blessings {
 
     /** Multiplicador de dano causado pelo jogador (tier 3 de alguns patronos). */
     public static float damageMultiplier(ServerPlayerEntity p, PlayerRpgData d, net.minecraft.entity.LivingEntity target) {
-        if (has(d, Patron.SOLENNE, 3) && target.getType().isIn(net.minecraft.registry.tag.EntityTypeTags.UNDEAD)) return 1.3f;
+        if (has(d, Patron.AUREON, 3) && target.getType().isIn(net.minecraft.registry.tag.EntityTypeTags.UNDEAD)) return 1.3f;
         if (has(d, Patron.MORVATH, 3) && p.getWorld().isNight()) return 1.2f;
         if (has(d, Patron.YSMERA, 3) && p.isTouchingWaterOrRain()) return 1.25f;
         return 1f;
+    }
+
+    /** Chance de crítico concedida por bênçãos. */
+    public static double critBonus(PlayerRpgData d) {
+        double c = 0;
+        if (has(d, Patron.NYMIRA, 1)) c += 0.05;
+        if (has(d, Patron.VAELOR, 3)) c += 0.10;
+        return c;
     }
 
     public static boolean nearShrine(ServerPlayerEntity p) {

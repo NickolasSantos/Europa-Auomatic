@@ -53,6 +53,10 @@ public final class ModItems {
     public static final Item STORMBREAKER = register("stormbreaker", new LegendaryWeaponItem(LegendaryWeaponItem.Effect.STORM, 7, -3.0f));
     public static final Item ARCANE_STAFF = register("arcane_staff", new ArcaneStaffItem(new Item.Settings().maxCount(1).maxDamage(600).rarity(Rarity.EPIC)));
 
+    // Moeda
+    public static final Item ASTER_FRAGMENT = register("aster_fragment", new Item(new Item.Settings().rarity(Rarity.UNCOMMON)));
+    public static final Item ASTER_PRISM = register("aster_prism", new Item(new Item.Settings().rarity(Rarity.RARE)));
+
     // Utilidades
     public static final Item CATACOMB_KEY = register("catacomb_key", new Item(new Item.Settings().maxCount(16).rarity(Rarity.RARE)));
     public static final Item REBIRTH_TOME = register("rebirth_tome", new RebirthTomeItem(new Item.Settings().maxCount(1).rarity(Rarity.RARE)));

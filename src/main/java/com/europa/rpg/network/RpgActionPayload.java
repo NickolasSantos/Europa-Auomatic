@@ -12,6 +12,7 @@ public record RpgActionPayload(String action, String arg) implements CustomPaylo
     public static final String CHOOSE_SUBCLASS = "subclass";
     public static final String UNLOCK_TALENT = "talent";
     public static final String PLEDGE_PATRON = "patron";
+    public static final String CHOOSE_RACE = "race";
 
     public static final Id<RpgActionPayload> ID = new Id<>(EuropaRPG.id("action"));
     public static final PacketCodec<PacketByteBuf, RpgActionPayload> CODEC = PacketCodec.tuple(

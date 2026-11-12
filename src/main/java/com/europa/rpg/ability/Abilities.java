@@ -1,7 +1,5 @@
 package com.europa.rpg.ability;
 
-import com.europa.rpg.entity.ServantEntity;
-import com.europa.rpg.registry.ModEntities;
 import com.europa.rpg.rpg.PlayerRpgData;
 import com.europa.rpg.util.TaskScheduler;
 import com.europa.rpg.util.Targeting;
@@ -53,7 +51,12 @@ public final class Abilities {
     }
 
     private static void reg(String id, int cost, int cooldown, AbilityDef.Action action) {
-        ALL.put(id, new AbilityDef(id, cost, cooldown, action));
+        add(new AbilityDef(id, cost, cooldown, action, () -> Text.translatable("rpg.europa.ability." + id + ".desc")));
+    }
+
+    static void add(AbilityDef def) {
+        if (ALL.containsKey(def.id())) throw new IllegalStateException("Habilidade duplicada: " + def.id());
+        ALL.put(def.id(), def);
     }
 
     static {
@@ -134,7 +137,7 @@ public final class Abilities {
         });
         reg("blizzard", 50, 30 * S, (p, d, pw) -> {
             for (LivingEntity e : enemies(p, p.getPos(), 8)) {
-                e.damage(p.getDamageSources().freeze(), 6f * pw);
+                e.damage(p.getDamageSources().indirectMagic(p, p), 6f * pw);
                 e.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 6 * S, 3));
                 e.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, 6 * S, 1));
                 e.setFrozenTicks(240);
@@ -204,26 +207,7 @@ public final class Abilities {
             return true;
         });
         reg("call_of_the_pack", 60, 90 * S, (p, d, pw) -> {
-            ServerWorld w = p.getServerWorld();
-            for (int i = 0; i < 3; i++) {
-                WolfEntity wolf = EntityType.WOLF.create(w);
-                if (wolf == null) continue;
-                BlockPos pos = p.getBlockPos().add(w.random.nextInt(3) - 1, 0, w.random.nextInt(3) - 1);
-                wolf.refreshPositionAndAngles(pos, p.getYaw(), 0);
-                wolf.setOwner(p);
-                wolf.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, 60 * S, 1));
-                wolf.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 60 * S, 0));
-                wolf.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 60 * S, 0));
-                wolf.setCustomName(Text.translatable("rpg.europa.spirit_wolf").formatted(Formatting.DARK_GREEN));
-                w.spawnEntity(wolf);
-                w.spawnParticles(ParticleTypes.POOF, wolf.getX(), wolf.getY() + 0.5, wolf.getZ(), 10, 0.3, 0.3, 0.3, 0.02);
-                TaskScheduler.schedule(60 * S, () -> {
-                    if (wolf.isAlive()) {
-                        w.spawnParticles(ParticleTypes.POOF, wolf.getX(), wolf.getY() + 0.5, wolf.getZ(), 10, 0.3, 0.3, 0.3, 0.02);
-                        wolf.discard();
-                    }
-                });
-            }
+            if (Summons.summon(p, Summons.Kind.WOLF, 3, 60 * S, pw, true) == 0) return false;
             sound(p, SoundEvents.ENTITY_WOLF_HOWL, 1.0f);
             return true;
         });
@@ -272,16 +256,9 @@ public final class Abilities {
         });
 
         // ============================================================ NECROMANTE
-        reg("raise_servant", 30, 15 * S, (p, d, pw) -> {
-            if (ServantEntity.countOwned(p) >= 2) {
-                p.sendMessage(Text.translatable("rpg.europa.servant_limit").formatted(Formatting.GRAY), true);
-                return false;
-            }
-            summonServants(p, 1, 45 * S, pw, false);
-            return true;
-        });
+        reg("raise_servant", 30, 15 * S, (p, d, pw) -> Summons.summon(p, Summons.Kind.SERVANT, 1, 45 * S, pw, false) > 0);
         reg("unholy_legion", 70, 60 * S, (p, d, pw) -> {
-            summonServants(p, 4, 30 * S, pw, true);
+            if (Summons.summon(p, Summons.Kind.SERVANT, 4, 30 * S, pw, true) == 0) return false;
             sound(p, SoundEvents.ENTITY_EVOKER_PREPARE_SUMMON, 0.7f);
             return true;
         });
@@ -541,21 +518,4 @@ public final class Abilities {
         });
     }
 
-    private static void summonServants(ServerPlayerEntity p, int count, int lifetime, float power, boolean empowered) {
-        ServerWorld w = p.getServerWorld();
-        for (int i = 0; i < count; i++) {
-            ServantEntity s = ModEntities.SERVANT.create(w);
-            if (s == null) continue;
-            BlockPos pos = p.getBlockPos().add(w.random.nextInt(3) - 1, 0, w.random.nextInt(3) - 1);
-            s.refreshPositionAndAngles(pos, p.getYaw(), 0);
-            s.bind(p, lifetime, power);
-            if (empowered) {
-                s.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, lifetime, 1));
-                s.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, lifetime, 0));
-            }
-            w.spawnEntity(s);
-            w.spawnParticles(ParticleTypes.SOUL, s.getX(), s.getY() + 0.5, s.getZ(), 15, 0.3, 0.6, 0.3, 0.02);
-        }
-        sound(p, SoundEvents.ENTITY_ZOMBIE_VILLAGER_CURE, 1.6f);
-    }
 }

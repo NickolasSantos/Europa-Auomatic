@@ -21,17 +21,20 @@ public class EuropaRPGClient implements ClientModInitializer {
     private static KeyBinding primaryKey;
     private static KeyBinding ultimateKey;
     private static KeyBinding characterKey;
+    private static KeyBinding racialKey;
 
     @Override
     public void onInitializeClient() {
         primaryKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.europa.primary", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_R, "category.europa"));
         ultimateKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.europa.ultimate", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_G, "category.europa"));
+        racialKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.europa.racial", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_V, "category.europa"));
         characterKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.europa.character", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_K, "category.europa"));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null) return;
             while (primaryKey.wasPressed()) ClientPlayNetworking.send(new CastAbilityPayload(AbilityHandler.PRIMARY));
             while (ultimateKey.wasPressed()) ClientPlayNetworking.send(new CastAbilityPayload(AbilityHandler.ULTIMATE));
+            while (racialKey.wasPressed()) ClientPlayNetworking.send(new CastAbilityPayload(AbilityHandler.RACIAL));
             while (characterKey.wasPressed()) client.setScreen(new CharacterScreen(-1));
             ClientRpgState.tick();
         });
@@ -42,6 +45,7 @@ public class EuropaRPGClient implements ClientModInitializer {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> ClientRpgState.reset());
 
         HudRenderCallback.EVENT.register(RpgHud::render);
+        net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback.EVENT.register(RarityTooltip::append);
         EntityRendererRegistry.register(ModEntities.CATACOMB_LORD, CatacombLordRenderer::new);
         EntityRendererRegistry.register(ModEntities.SERVANT, ServantRenderer::new);
     }

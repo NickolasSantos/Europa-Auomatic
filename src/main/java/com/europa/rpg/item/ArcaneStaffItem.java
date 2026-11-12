@@ -41,7 +41,7 @@ public class ArcaneStaffItem extends Item {
             return TypedActionResult.fail(stack);
         }
         if (!p.isCreative()) d.mana -= MANA_COST;
-        float dmg = 6f * Progression.powerScale(d) * (d.rpgClass == RpgClass.MAGE ? 1.5f : 1f);
+        float dmg = 6f * Progression.powerScale(p, d) * (d.rpgClass.category == RpgClass.Category.ARCANE ? 1.5f : 1f);
         LivingEntity target = Targeting.lookTarget(p, 40);
         Vec3d end = target != null ? target.getPos().add(0, target.getHeight() / 2, 0) : Targeting.blockHitPos(p, 40);
         Targeting.particleLine(p.getServerWorld(), ParticleTypes.WITCH, p.getEyePos().subtract(0, 0.3, 0), end, 0.35);

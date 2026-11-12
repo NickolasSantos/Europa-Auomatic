@@ -43,9 +43,17 @@ public final class QuestManager {
         p.sendMessage(Text.translatable("rpg.europa.board.header").formatted(Formatting.GOLD, Formatting.BOLD));
         for (Quest q : Quests.ALL.values()) {
             Availability a = availability(d, q);
-            MutableText line = Text.literal(" ").append(Text.translatable(q.titleKey()).formatted(color(a)));
+            MutableText line = Text.literal(" ");
+            if (q.faction() != null) {
+                var f = com.europa.rpg.economy.Factions.byId(q.faction());
+                line.append(Text.literal("[").append(Text.translatable(f.translationKey())).append("] ").formatted(f.color()));
+            }
+            line.append(Text.translatable(q.titleKey()).formatted(color(a)));
             MutableText hover = Text.translatable(q.descKey()).append("\n")
                     .append(Text.translatable("rpg.europa.board.reward", q.xpReward()).formatted(Formatting.GREEN));
+            if (q.fragments() > 0) hover.append("\n").append(Text.translatable("rpg.europa.board.fragments", q.fragments()).formatted(Formatting.YELLOW));
+            if (q.faction() != null) hover.append("\n").append(Text.translatable("rpg.europa.board.rep", q.repReward(),
+                    Text.translatable(com.europa.rpg.economy.Factions.byId(q.faction()).translationKey())).formatted(Formatting.AQUA));
             for (Quest.Reward r : q.items()) {
                 Item item = Registries.ITEM.get(r.item());
                 hover.append("\n - ").append(Text.literal(r.count() + "x ")).append(item.getName());
@@ -164,6 +172,9 @@ public final class QuestManager {
             if (!p.getInventory().insertStack(stack)) p.dropItem(stack, false);
         }
         p.getServerWorld().playSound(null, p.getBlockPos(), SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1f, 1f);
+        if (q.fragments() > 0) com.europa.rpg.economy.Market.give(p, q.fragments());
+        if (q.faction() != null) com.europa.rpg.economy.Factions.addRep(p, q.faction(), q.repReward());
+        else com.europa.rpg.economy.Factions.addRep(p, "wanderers", 25);
         Progression.addXp(p, q.xpReward());
     }
 

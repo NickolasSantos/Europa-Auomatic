@@ -19,7 +19,7 @@ public final class RpgActions {
         if (d.hasClass()) return fail(p, "rpg.europa.already_class");
         d.rpgClass = c;
         d.subclass = RpgSubclass.NONE;
-        d.mana = Progression.maxMana(d);
+        d.mana = c.resource.combatBuilt ? 0 : Progression.maxMana(d);
         Progression.applyAttributes(p);
         p.setHealth(p.getMaxHealth());
         Progression.sync(p);
@@ -58,6 +58,19 @@ public final class RpgActions {
         Talents.unlock(d, n);
         Progression.applyAttributes(p);
         p.getServerWorld().playSound(null, p.getBlockPos(), SoundEvents.BLOCK_ENCHANTMENT_TABLE_USE, SoundCategory.PLAYERS, 0.6f, 1.5f);
+        return true;
+    }
+
+    public static boolean chooseRace(ServerPlayerEntity p, String id) {
+        PlayerRpgData d = RpgAttachments.get(p);
+        com.europa.rpg.race.Race race = com.europa.rpg.race.Race.byId(id);
+        if (race == null) return fail(p, "rpg.europa.unknown_race");
+        if (d.hasRace()) return fail(p, "rpg.europa.already_race");
+        d.race = race.id();
+        if (!Progression.resource(d).combatBuilt) d.mana = Math.min(d.mana, Progression.maxMana(d));
+        Progression.applyAttributes(p);
+        p.sendMessage(Text.translatable("rpg.europa.race_chosen", Text.translatable(race.translationKey()).formatted(race.color())).formatted(Formatting.GOLD));
+        p.getServerWorld().playSound(null, p.getBlockPos(), SoundEvents.BLOCK_BEACON_ACTIVATE, SoundCategory.PLAYERS, 0.6f, 1.4f);
         return true;
     }
 

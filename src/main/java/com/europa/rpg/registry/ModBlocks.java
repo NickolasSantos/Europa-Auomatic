@@ -2,6 +2,7 @@ package com.europa.rpg.registry;
 
 import com.europa.rpg.EuropaRPG;
 import com.europa.rpg.block.BossAltarBlock;
+import com.europa.rpg.block.MerchantCounterBlock;
 import com.europa.rpg.block.QuestBoardBlock;
 import com.europa.rpg.block.ShrineBlock;
 import net.minecraft.block.AbstractBlock;
@@ -33,6 +34,8 @@ public final class ModBlocks {
 
     public static final Block SHRINE = register("shrine", new ShrineBlock(AbstractBlock.Settings.copy(Blocks.CHISELED_STONE_BRICKS)
             .strength(3f, 6f).luminance(s -> 12)));
+
+    public static final Block MERCHANT_COUNTER = register("merchant_counter", new MerchantCounterBlock(AbstractBlock.Settings.copy(Blocks.SPRUCE_PLANKS).strength(2.5f)));
 
     private ModBlocks() {}
 

@@ -31,8 +31,15 @@ public final class PlayerRpgData {
             Codec.STRING.optionalFieldOf("patron", "").forGetter(d -> d.patron),
             Codec.INT.optionalFieldOf("favor", 0).forGetter(d -> d.favor),
             INT_MAP.optionalFieldOf("prof_levels", Map.of()).forGetter(d -> d.profLevels),
-            INT_MAP.optionalFieldOf("prof_xp", Map.of()).forGetter(d -> d.profXp)
+            INT_MAP.optionalFieldOf("prof_xp", Map.of()).forGetter(d -> d.profXp),
+            Codec.STRING.optionalFieldOf("race", "").forGetter(d -> d.race),
+            INT_MAP.optionalFieldOf("reputation", Map.of()).forGetter(d -> d.reputation)
     ).apply(i, PlayerRpgData::new));
+
+    /** Migração das profissões da versão 0.2 para as do documento mestre. */
+    private static final Map<String, String> LEGACY_PROFESSIONS = Map.of(
+            "mining", "anomaly_geologist", "woodcutting", "biome_gardener", "farming", "biome_gardener",
+            "fishing", "phenomenon_tamer", "smithing", "artifact_restorer", "alchemy", "memory_distiller");
 
     public RpgClass rpgClass;
     public RpgSubclass subclass;
@@ -50,14 +57,19 @@ public final class PlayerRpgData {
     public int favor;
     public final Map<String, Integer> profLevels;
     public final Map<String, Integer> profXp;
+    /** id da raça ("" = não escolhida). */
+    public String race;
+    /** id da facção -> reputação. */
+    public final Map<String, Integer> reputation;
 
     public PlayerRpgData() {
-        this("none", "none", 1, 0, 100f, Map.of(), Map.of(), List.of(), Map.of(), "", 0, Map.of(), Map.of());
+        this("none", "none", 1, 0, 100f, Map.of(), Map.of(), List.of(), Map.of(), "", 0, Map.of(), Map.of(), "", Map.of());
     }
 
     private PlayerRpgData(String cls, String sub, int level, int xp, float mana, Map<String, Long> cooldowns,
                           Map<String, Integer> active, List<String> completed, Map<String, Integer> talents,
-                          String patron, int favor, Map<String, Integer> profLevels, Map<String, Integer> profXp) {
+                          String patron, int favor, Map<String, Integer> profLevels, Map<String, Integer> profXp,
+                          String race, Map<String, Integer> reputation) {
         this.rpgClass = RpgClass.byId(cls);
         this.subclass = RpgSubclass.byId(sub);
         this.level = Math.max(1, level);
@@ -67,10 +79,18 @@ public final class PlayerRpgData {
         this.activeQuests = new HashMap<>(active);
         this.completedQuests = new HashSet<>(completed);
         this.talents = new HashMap<>(talents);
-        this.patron = patron;
+        this.patron = com.europa.rpg.blessing.Patron.canonicalId(patron);
         this.favor = favor;
-        this.profLevels = new HashMap<>(profLevels);
-        this.profXp = new HashMap<>(profXp);
+        this.profLevels = new HashMap<>();
+        this.profXp = new HashMap<>();
+        profLevels.forEach((k, v) -> this.profLevels.merge(LEGACY_PROFESSIONS.getOrDefault(k, k), v, Math::max));
+        profXp.forEach((k, v) -> this.profXp.merge(LEGACY_PROFESSIONS.getOrDefault(k, k), v, Math::max));
+        this.race = race;
+        this.reputation = new HashMap<>(reputation);
+    }
+
+    public boolean hasRace() {
+        return !race.isEmpty();
     }
 
     public boolean hasClass() {

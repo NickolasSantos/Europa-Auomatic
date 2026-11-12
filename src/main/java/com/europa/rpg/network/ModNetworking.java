@@ -19,7 +19,7 @@ public final class ModNetworking {
 
         ServerPlayNetworking.registerGlobalReceiver(CastAbilityPayload.ID, (payload, ctx) -> {
             int slot = payload.slot();
-            if (slot == AbilityHandler.PRIMARY || slot == AbilityHandler.ULTIMATE) AbilityHandler.tryCast(ctx.player(), slot);
+            AbilityHandler.tryCast(ctx.player(), slot);
         });
         ServerPlayNetworking.registerGlobalReceiver(RpgActionPayload.ID, (payload, ctx) -> {
             var p = ctx.player();
@@ -28,6 +28,7 @@ public final class ModNetworking {
                 case RpgActionPayload.CHOOSE_SUBCLASS -> RpgActions.chooseSubclass(p, payload.arg());
                 case RpgActionPayload.UNLOCK_TALENT -> RpgActions.unlockTalent(p, payload.arg());
                 case RpgActionPayload.PLEDGE_PATRON -> Blessings.pledge(p, payload.arg());
+                case RpgActionPayload.CHOOSE_RACE -> RpgActions.chooseRace(p, payload.arg());
                 default -> {}
             }
             Progression.fullSync(p, true);

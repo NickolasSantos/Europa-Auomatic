@@ -18,18 +18,31 @@ public record Patron(String id, Formatting color, Identifier icon, Map<Identifie
 
     private static final Map<String, Patron> ALL = new LinkedHashMap<>();
 
-    public static final Patron SOLENNE = reg("solenne", Formatting.GOLD, "sunflower",
+    // Divindades do documento mestre
+    public static final Patron AUREON = reg("aureon", Formatting.GOLD, "sunflower",
             "gold_ingot", 5, "sunflower", 3, "glowstone_dust", 2, "golden_apple", 25, "gold_block", 45);
-    public static final Patron MORVATH = reg("morvath", Formatting.DARK_PURPLE, "crying_obsidian",
-            "ender_pearl", 6, "obsidian", 3, "crying_obsidian", 5, "wither_rose", 20, "echo_shard", 30);
+    public static final Patron THARION = reg("tharion", Formatting.YELLOW, "lightning_rod",
+            "feather", 1, "copper_ingot", 1, "lightning_rod", 6, "phantom_membrane", 8, "breeze_rod", 12);
+    public static final Patron SYLVARA = reg("sylvara", Formatting.GREEN, "oak_sapling",
+            "wheat", 1, "oak_sapling", 2, "glow_berries", 2, "golden_carrot", 6, "emerald", 10);
+    public static final Patron NYMIRA = reg("nymira", Formatting.LIGHT_PURPLE, "spyglass",
+            "amethyst_shard", 2, "glass_pane", 1, "spider_eye", 2, "spyglass", 15, "ender_eye", 12);
+    // Divindades complementares
     public static final Patron THALOR = reg("thalor", Formatting.GRAY, "anvil",
             "raw_iron", 2, "iron_ingot", 3, "diamond", 15, "europa:adamantite_ingot", 12, "netherite_scrap", 40);
     public static final Patron YSMERA = reg("ysmera", Formatting.AQUA, "heart_of_the_sea",
             "cod", 1, "salmon", 1, "prismarine_shard", 3, "prismarine_crystals", 4, "nautilus_shell", 20, "heart_of_the_sea", 80);
-    public static final Patron KAELITH = reg("kaelith", Formatting.YELLOW, "lightning_rod",
-            "feather", 1, "copper_ingot", 1, "lightning_rod", 6, "phantom_membrane", 8, "breeze_rod", 12);
-    public static final Patron VERDANYA = reg("verdanya", Formatting.GREEN, "oak_sapling",
-            "wheat", 1, "oak_sapling", 2, "glow_berries", 2, "golden_carrot", 6, "emerald", 10);
+    public static final Patron MORVATH = reg("morvath", Formatting.DARK_PURPLE, "crying_obsidian",
+            "ender_pearl", 6, "obsidian", 3, "crying_obsidian", 5, "wither_rose", 20, "echo_shard", 30);
+    public static final Patron VAELOR = reg("vaelor", Formatting.RED, "iron_sword",
+            "bone", 1, "rotten_flesh", 1, "gunpowder", 2, "europa:soul_shard", 8, "wither_skeleton_skull", 40);
+
+    /** Ids da versão 0.2 -> divindades atuais. */
+    private static final Map<String, String> LEGACY = Map.of("solenne", "aureon", "kaelith", "tharion", "verdanya", "sylvara");
+
+    public static String canonicalId(String id) {
+        return LEGACY.getOrDefault(id, id);
+    }
 
     private static Patron reg(String id, Formatting color, String icon, Object... offerings) {
         Map<Identifier, Integer> map = new LinkedHashMap<>();
@@ -40,7 +53,7 @@ public record Patron(String id, Formatting color, Identifier icon, Map<Identifie
     }
 
     public static Patron byId(String id) {
-        return ALL.get(id);
+        return ALL.get(canonicalId(id));
     }
 
     public static List<Patron> all() {

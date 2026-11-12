@@ -79,6 +79,7 @@ public final class Targeting {
                 && !(e instanceof net.minecraft.entity.player.PlayerEntity)
                 && !(e instanceof net.minecraft.entity.passive.TameableEntity t && t.getOwner() == p)
                 && !(e instanceof com.europa.rpg.entity.ServantEntity s && s.isOwnedBy(p))
+                && !com.europa.rpg.ability.Summons.isSummonOf(e, p)
                 && e.squaredDistanceTo(center) <= radius * radius);
     }
 }

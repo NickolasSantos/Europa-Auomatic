@@ -4,10 +4,14 @@
   "package": "com.europa.rpg.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "AnvilScreenHandlerMixin",
     "BrewingStandBlockEntityMixin",
+    "ContainerLootCriterionMixin",
     "ItemStackMixin",
     "LivingEntityMixin",
     "PotionSlotMixin"
   ],
-  "injectors": { "defaultRequire": 1 }
+  "injectors": {
+    "defaultRequire": 1
+  }
 }

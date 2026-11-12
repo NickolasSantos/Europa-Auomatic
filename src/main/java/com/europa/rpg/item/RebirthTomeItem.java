@@ -32,7 +32,8 @@ public class RebirthTomeItem extends Item {
         ItemStack stack = user.getStackInHand(hand);
         if (user instanceof ServerPlayerEntity p) {
             PlayerRpgData d = RpgAttachments.get(p);
-            if (!d.hasClass()) return TypedActionResult.fail(stack);
+            if (!d.hasClass() && !d.hasRace()) return TypedActionResult.fail(stack);
+            d.race = "";
             d.rpgClass = RpgClass.NONE;
             d.subclass = RpgSubclass.NONE;
             d.cooldowns.clear();

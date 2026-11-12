@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "europa:quest_board"
+    "europa:quest_board",
+    "europa:merchant_counter"
   ]
 }

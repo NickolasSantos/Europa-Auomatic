@@ -7,7 +7,13 @@
         {
           "type": "minecraft:item",
           "name": "europa:soulreaper",
-          "weight": 1
+          "weight": 1,
+          "functions": [
+            {
+              "function": "europa:roll_rarity",
+              "min_tier": 4
+            }
+          ]
         }
       ],
       "conditions": [
@@ -21,23 +27,67 @@
       "entries": [
         {
           "type": "minecraft:item",
+          "name": "europa:aster_prism",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 4,
+                "max": 8
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
           "name": "europa:stormbreaker",
-          "weight": 1
+          "weight": 1,
+          "functions": [
+            {
+              "function": "europa:roll_rarity",
+              "min_tier": 4
+            }
+          ]
         },
         {
           "type": "minecraft:item",
           "name": "europa:flamebrand",
-          "weight": 1
+          "weight": 1,
+          "functions": [
+            {
+              "function": "europa:roll_rarity",
+              "min_tier": 4
+            }
+          ]
         },
         {
           "type": "minecraft:item",
           "name": "europa:frostfang",
-          "weight": 1
+          "weight": 1,
+          "functions": [
+            {
+              "function": "europa:roll_rarity",
+              "min_tier": 4
+            }
+          ]
         },
         {
           "type": "minecraft:item",
           "name": "europa:arcane_staff",
-          "weight": 1
+          "weight": 1,
+          "functions": [
+            {
+              "function": "europa:roll_rarity",
+              "min_tier": 4
+            }
+          ]
         }
       ],
       "conditions": [

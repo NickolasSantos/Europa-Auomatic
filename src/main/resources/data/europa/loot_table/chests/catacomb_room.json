@@ -178,6 +178,10 @@
           "weight": 10,
           "functions": [
             {
+              "function": "europa:roll_rarity",
+              "min_tier": 1
+            },
+            {
               "function": "minecraft:enchant_with_levels",
               "levels": {
                 "type": "minecraft:uniform",
@@ -190,12 +194,24 @@
         {
           "type": "minecraft:item",
           "name": "europa:mithril_helmet",
-          "weight": 6
+          "weight": 6,
+          "functions": [
+            {
+              "function": "europa:roll_rarity",
+              "min_tier": 1
+            }
+          ]
         },
         {
           "type": "minecraft:item",
           "name": "europa:mithril_chestplate",
-          "weight": 5
+          "weight": 5,
+          "functions": [
+            {
+              "function": "europa:roll_rarity",
+              "min_tier": 1
+            }
+          ]
         },
         {
           "type": "minecraft:item",
@@ -220,12 +236,24 @@
         {
           "type": "minecraft:item",
           "name": "europa:flamebrand",
-          "weight": 2
+          "weight": 2,
+          "functions": [
+            {
+              "function": "europa:roll_rarity",
+              "min_tier": 3
+            }
+          ]
         },
         {
           "type": "minecraft:item",
           "name": "europa:frostfang",
-          "weight": 2
+          "weight": 2,
+          "functions": [
+            {
+              "function": "europa:roll_rarity",
+              "min_tier": 3
+            }
+          ]
         },
         {
           "type": "minecraft:item",
@@ -235,7 +263,28 @@
         {
           "type": "minecraft:item",
           "name": "europa:arcane_staff",
-          "weight": 2
+          "weight": 2,
+          "functions": [
+            {
+              "function": "europa:roll_rarity",
+              "min_tier": 3
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "europa:aster_fragment",
+          "weight": 8,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 3,
+                "max": 10
+              }
+            }
+          ]
         }
       ]
     }

@@ -33,9 +33,11 @@ import java.util.Map;
 
 /** Tela de personagem (tecla K): ficha/escolha de classe, talentos, bênção e profissões. */
 public class CharacterScreen extends Screen {
-    private static final int W = 360, H = 236;
-    private static final int TAB_SHEET = 0, TAB_TALENTS = 1, TAB_BLESSING = 2, TAB_PROFESSIONS = 3;
+    private static final int W = 384, H = 240;
+    private static final int TAB_SHEET = 0, TAB_RACE = 1, TAB_TALENTS = 2, TAB_BLESSING = 3, TAB_PROFESSIONS = 4, TAB_FACTIONS = 5;
+    private static final String[] TABS = {"sheet", "race", "talents", "blessing", "professions", "factions"};
     private static int lastTab = TAB_SHEET;
+    private static RpgClass.Category pickerCategory = RpgClass.Category.MARTIAL;
 
     private int tab;
     private int left, top;
@@ -55,11 +57,10 @@ public class CharacterScreen extends Screen {
         left = (width - W) / 2;
         top = (height - H) / 2;
         seenVersion = ClientRpgState.version;
-        String[] tabs = {"sheet", "talents", "blessing", "professions"};
-        int tw = (W - 8) / 4;
-        for (int i = 0; i < 4; i++) {
+        int tw = (W - 8) / TABS.length;
+        for (int i = 0; i < TABS.length; i++) {
             final int idx = i;
-            ButtonWidget b = ButtonWidget.builder(Text.translatable("rpg.europa.screen.tab." + tabs[i]), btn -> {
+            ButtonWidget b = ButtonWidget.builder(Text.translatable("rpg.europa.screen.tab." + TABS[i]), btn -> {
                 tab = idx;
                 lastTab = idx;
                 clearAndInit();
@@ -69,6 +70,7 @@ public class CharacterScreen extends Screen {
         }
         switch (tab) {
             case TAB_SHEET -> initSheet();
+            case TAB_RACE -> initRace();
             case TAB_TALENTS -> initTalents();
             case TAB_BLESSING -> initBlessing();
             default -> {}
@@ -89,11 +91,22 @@ public class CharacterScreen extends Screen {
     private void initSheet() {
         PlayerRpgData d = data();
         if (!d.hasClass()) {
-            List<RpgClass> classes = RpgClass.all();
-            int cols = 3, bw = 110, bh = 20;
+            RpgClass.Category[] cats = RpgClass.Category.values();
+            int cw = (W - 20) / cats.length;
+            for (int i = 0; i < cats.length; i++) {
+                RpgClass.Category cat = cats[i];
+                ButtonWidget cb = ButtonWidget.builder(Text.translatable(cat.translationKey()), b -> {
+                    pickerCategory = cat;
+                    clearAndInit();
+                }).dimensions(left + 10 + i * cw, top + 44, cw - 2, 18).build();
+                cb.active = cat != pickerCategory;
+                addDrawableChild(cb);
+            }
+            List<RpgClass> classes = RpgClass.byCategory(pickerCategory);
+            int cols = 3, bw = 118, bh = 20;
             for (int i = 0; i < classes.size(); i++) {
                 RpgClass c = classes.get(i);
-                int x = left + 10 + (i % cols) * (bw + 2), y = top + 48 + (i / cols) * (bh + 4);
+                int x = left + 10 + (i % cols) * (bw + 3), y = top + 72 + (i / cols) * (bh + 4);
                 addDrawableChild(ButtonWidget.builder(Text.translatable(c.translationKey()).formatted(c.color), b -> send(RpgActionPayload.CHOOSE_CLASS, c.id))
                         .dimensions(x, y, bw, bh).tooltip(Tooltip.of(classTooltip(c))).build());
             }
@@ -104,14 +117,16 @@ public class CharacterScreen extends Screen {
             for (int i = 0; i < subs.size(); i++) {
                 RpgSubclass s = subs.get(i);
                 addDrawableChild(ButtonWidget.builder(Text.translatable(s.translationKey()).formatted(s.color), b -> send(RpgActionPayload.CHOOSE_SUBCLASS, s.id))
-                        .dimensions(left + 10 + i * 172, top + H - 30, 168, 20).tooltip(Tooltip.of(subclassTooltip(s))).build());
+                        .dimensions(left + 10 + i * 122, top + H - 30, 118, 20).tooltip(Tooltip.of(subclassTooltip(s))).build());
             }
         }
     }
 
     private static Text classTooltip(RpgClass c) {
         MutableText t = Text.translatable(c.translationKey()).formatted(c.color, Formatting.BOLD).append("\n")
-                .append(Text.translatable(c.translationKey() + ".desc").formatted(Formatting.GRAY)).append("\n\n")
+                .append(Text.translatable(c.translationKey() + ".desc").formatted(Formatting.GRAY)).append("\n")
+                .append(Text.translatable("rpg.europa.screen.resource").formatted(Formatting.DARK_AQUA))
+                .append(Text.translatable(c.resource.translationKey()).styled(st -> st.withColor(c.resource.color & 0xFFFFFF))).append("\n\n")
                 .append(Text.translatable("rpg.europa.ability_label").formatted(Formatting.YELLOW))
                 .append(abilityText(c.primaryAbility)).append("\n\n")
                 .append(Text.translatable("rpg.europa.screen.subclasses").formatted(Formatting.LIGHT_PURPLE));
@@ -133,18 +148,17 @@ public class CharacterScreen extends Screen {
     private static MutableText abilityText(String id) {
         AbilityDef def = Abilities.get(id);
         MutableText t = Text.translatable("rpg.europa.ability." + id).formatted(Formatting.WHITE);
-        if (def != null) {
-            t.append(Text.literal(String.format(Locale.ROOT, "  (%d mana, %.0fs)", def.manaCost(), def.cooldown() / 20f)).formatted(Formatting.DARK_AQUA));
-        }
-        return t.append("\n").append(Text.translatable("rpg.europa.ability." + id + ".desc").formatted(Formatting.GRAY));
+        if (def == null) return t;
+        t.append(Text.literal(String.format(Locale.ROOT, "  (%.0fs)", def.cooldown() / 20f)).formatted(Formatting.DARK_AQUA));
+        return t.append("\n").append(def.description().get().copy().formatted(Formatting.GRAY));
     }
 
     private void renderSheet(DrawContext ctx) {
         PlayerRpgData d = data();
         int x = left + 10, y = top + 30;
         if (!d.hasClass()) {
-            ctx.drawCenteredTextWithShadow(textRenderer, Text.translatable("rpg.europa.choose_class").formatted(Formatting.GOLD), left + W / 2, y + 4, 0xFFFFFF);
-            ctx.drawCenteredTextWithShadow(textRenderer, Text.translatable("rpg.europa.screen.hover_hint").formatted(Formatting.GRAY), left + W / 2, top + 152, 0xFFFFFF);
+            ctx.drawCenteredTextWithShadow(textRenderer, Text.translatable("rpg.europa.choose_class").formatted(Formatting.GOLD), left + W / 2, y, 0xFFFFFF);
+            ctx.drawCenteredTextWithShadow(textRenderer, Text.translatable("rpg.europa.screen.hover_hint").formatted(Formatting.GRAY), left + W / 2, top + H - 16, 0xFFFFFF);
             return;
         }
         ctx.drawItem(new ItemStack(Registries.ITEM.get(Identifier.of(d.rpgClass.icon))), x, y);
@@ -156,7 +170,9 @@ public class CharacterScreen extends Screen {
         ctx.drawTextWithShadow(textRenderer, Text.translatable("rpg.europa.stats.level", d.level, d.xp, needed), x, y, 0xFFFFFF);
         bar(ctx, x + 160, y + 2, 170, 5, needed > 0 ? d.xp / (float) needed : 1f, 0xFF7CFC00);
         y += 12;
-        ctx.drawTextWithShadow(textRenderer, Text.translatable("rpg.europa.stats.mana", (int) d.mana, (int) Progression.maxMana(d)), x, y, 0xFF9EC5FF);
+        ctx.drawTextWithShadow(textRenderer, Text.translatable(d.rpgClass.resource.translationKey()).append(": " + (int) d.mana + "/" + (int) Progression.maxMana(d)), x, y, d.rpgClass.resource.color);
+        com.europa.rpg.race.Race race = com.europa.rpg.race.Races.of(d);
+        if (race != null) ctx.drawTextWithShadow(textRenderer, Text.translatable("rpg.europa.screen.race_label").append(Text.translatable(race.translationKey()).formatted(race.color())), x + 170, y, 0xFFCCCCCC);
         y += 12;
         if (client != null && client.player != null) {
             var pl = client.player;
@@ -169,6 +185,7 @@ public class CharacterScreen extends Screen {
         y += 16;
         y = drawAbility(ctx, x, y, "R", AbilityHandler.abilityFor(d, AbilityHandler.PRIMARY), d);
         y = drawAbility(ctx, x, y + 4, "G", AbilityHandler.abilityFor(d, AbilityHandler.ULTIMATE), d);
+        y = drawAbility(ctx, x, y + 4, "V", AbilityHandler.abilityFor(d, AbilityHandler.RACIAL), d);
         if (d.level >= Progression.SUBCLASS_LEVEL && d.subclass == RpgSubclass.NONE) {
             ctx.drawTextWithShadow(textRenderer, Text.translatable("rpg.europa.choose_subclass").formatted(Formatting.LIGHT_PURPLE), x, top + H - 42, 0xFFFFFF);
         } else if (d.subclass == RpgSubclass.NONE) {
@@ -178,13 +195,14 @@ public class CharacterScreen extends Screen {
 
     private int drawAbility(DrawContext ctx, int x, int y, String key, AbilityDef def, PlayerRpgData d) {
         if (def == null) return y;
-        Text head = Text.literal("[" + key + "] ").formatted(Formatting.YELLOW)
-                .append(Text.translatable(def.translationKey()).formatted(Formatting.WHITE))
-                .append(Text.literal(String.format(Locale.ROOT, "  %d mana · %.1fs",
-                        AbilityHandler.effectiveCost(d, def), AbilityHandler.effectiveCooldown(d, def) / 20f)).formatted(Formatting.DARK_AQUA));
+        MutableText head = Text.literal("[" + key + "] ").formatted(Formatting.YELLOW)
+                .append(Text.translatable(def.translationKey()).formatted(Formatting.WHITE));
+        int cost = AbilityHandler.effectiveCost(d, def);
+        head.append(Text.literal("  ").append(cost > 0 ? Text.literal(cost + " ").append(Text.translatable(d.rpgClass.resource.translationKey())).append(" · ") : Text.empty())
+                .append(String.format(Locale.ROOT, "%.0fs", AbilityHandler.effectiveCooldown(d, def) / 20f)).formatted(Formatting.DARK_AQUA));
         ctx.drawTextWithShadow(textRenderer, head, x, y, 0xFFFFFF);
         y += 10;
-        for (OrderedText line : textRenderer.wrapLines(Text.translatable(def.translationKey() + ".desc").formatted(Formatting.GRAY), W - 30)) {
+        for (OrderedText line : textRenderer.wrapLines(def.description().get().copy().formatted(Formatting.GRAY), W - 30)) {
             ctx.drawTextWithShadow(textRenderer, line, x + 8, y, 0xFFFFFF);
             y += 9;
         }
@@ -196,7 +214,7 @@ public class CharacterScreen extends Screen {
     private void initTalents() {
         PlayerRpgData d = data();
         TalentNode.Branch[] branches = TalentNode.Branch.values();
-        int colW = 112;
+        int colW = 118;
         for (int b = 0; b < branches.length; b++) {
             for (int tier = 1; tier <= 5; tier++) {
                 TalentNode n = Talents.at(branches[b], tier);
@@ -238,7 +256,7 @@ public class CharacterScreen extends Screen {
         PlayerRpgData d = data();
         ctx.drawTextWithShadow(textRenderer, Text.translatable("rpg.europa.stats.talents", Talents.availablePoints(d)).formatted(Formatting.YELLOW), left + 10, top + 28, 0xFFFFFF);
         TalentNode.Branch[] branches = TalentNode.Branch.values();
-        int colW = 112;
+        int colW = 118;
         for (int b = 0; b < branches.length; b++) {
             int cx = left + 10 + b * (colW + 2);
             Text head = Text.translatable("rpg.europa.talent.branch." + branches[b].name().toLowerCase(Locale.ROOT))
@@ -294,7 +312,7 @@ public class CharacterScreen extends Screen {
             hy += 9;
         }
         Patron p = d.patron.isEmpty() ? null : Patron.byId(d.patron);
-        int y = top + 100;
+        int y = top + 124;
         if (p == null) {
             ctx.drawTextWithShadow(textRenderer, Text.translatable("rpg.europa.patron.none").formatted(Formatting.DARK_GRAY), x, y, 0xFFFFFF);
             return;
@@ -325,20 +343,138 @@ public class CharacterScreen extends Screen {
 
     // ------------------------------------------------------------------ profissões
 
+    private int hoverX, hoverY;
+    private List<OrderedText> perkTooltip;
+
     private void renderProfessions(DrawContext ctx) {
+        perkTooltip = null;
         PlayerRpgData d = data();
-        int x = left + 10, y = top + 32;
+        int x = left + 10;
         for (Profession p : Profession.values()) {
             int lvl = Professions.level(d, p), xp = Professions.xp(d, p);
             int need = lvl >= Profession.MAX_LEVEL ? 0 : Profession.xpForNext(lvl);
-            ctx.drawItem(new ItemStack(Registries.ITEM.get(p.icon)), x, y + 4);
-            ctx.drawTextWithShadow(textRenderer, Text.translatable(p.translationKey()).formatted(Formatting.WHITE, Formatting.BOLD)
-                    .append(Text.literal("  " + lvl + "/" + Profession.MAX_LEVEL).formatted(Formatting.AQUA)), x + 22, y, 0xFFFFFF);
-            bar(ctx, x + 220, y + 2, 110, 5, need > 0 ? xp / (float) need : 1f, 0xFF4DD2FF);
-            String chance = p == Profession.FISHING ? "+" + fmt(Professions.fishingLuck(d)) : fmt(Professions.perkChance(d, p) * 100) + "%";
-            ctx.drawTextWithShadow(textRenderer, Text.translatable(p.translationKey() + ".perk", chance).formatted(Formatting.GRAY), x + 22, y + 11, 0xFFFFFF);
-            y += 32;
+            int col = p.ordinal() % 2, row = p.ordinal() / 2;
+            int px = x + col * 184, py = top + 30 + row * 34;
+            ctx.drawItem(new ItemStack(Registries.ITEM.get(p.icon)), px, py + 4);
+            ctx.drawTextWithShadow(textRenderer, Text.translatable(p.translationKey()).formatted(Formatting.WHITE)
+                    .append(Text.literal(" " + lvl).formatted(Formatting.AQUA)), px + 20, py, 0xFFFFFF);
+            ctx.drawTextWithShadow(textRenderer, Text.translatable(Profession.tierKey(lvl)).formatted(tierColor(lvl)), px + 20, py + 10, 0xFFFFFF);
+            bar(ctx, px + 92, py + 12, 74, 4, need > 0 ? xp / (float) need : 1f, 0xFF4DD2FF);
+            String chance = p == Profession.PHENOMENON_TAMER ? "+" + fmt(Professions.fishingLuck(d))
+                    : p == Profession.DIMENSIONAL_NAVIGATOR ? "+" + fmt(Professions.travelSpeed(d) * 1000) + "%"
+                    : fmt(Professions.perkChance(d, p) * 100) + "%";
+            Text perk = Text.translatable(p.translationKey() + ".perk", chance).formatted(Formatting.GRAY);
+            int maxW = 160;
+            if (textRenderer.getWidth(perk) > maxW) {
+                ctx.drawTextWithShadow(textRenderer, net.minecraft.text.StringVisitable.concat(textRenderer.trimToWidth(perk, maxW - 8), Text.literal("…")).getString(), px + 20, py + 20, 0xFFAAAAAA);
+                if (hoverX >= px && hoverX < px + 180 && hoverY >= py && hoverY < py + 32) {
+                    perkTooltip = textRenderer.wrapLines(perk.copy().formatted(Formatting.WHITE), 200);
+                }
+            } else {
+                ctx.drawTextWithShadow(textRenderer, perk, px + 20, py + 20, 0xFFFFFF);
+            }
         }
+    }
+
+    private static Formatting tierColor(int lvl) {
+        return switch (Profession.tier(lvl)) {
+            case 0 -> Formatting.GRAY;
+            case 1 -> Formatting.GREEN;
+            case 2 -> Formatting.BLUE;
+            case 3 -> Formatting.DARK_PURPLE;
+            default -> Formatting.GOLD;
+        };
+    }
+
+    // ------------------------------------------------------------------ raça
+
+    private void initRace() {
+        PlayerRpgData d = data();
+        List<com.europa.rpg.race.Race> races = com.europa.rpg.race.Race.all();
+        int bw = 118, bh = 18;
+        for (int i = 0; i < races.size(); i++) {
+            com.europa.rpg.race.Race r = races.get(i);
+            boolean current = r.id().equals(d.race);
+            Text label = Text.literal(current ? "★ " : "").append(Text.translatable(r.translationKey())).formatted(r.color());
+            ButtonWidget b = ButtonWidget.builder(label, x -> send(RpgActionPayload.CHOOSE_RACE, r.id()))
+                    .dimensions(left + 10 + (i % 3) * (bw + 3), top + 44 + (i / 3) * (bh + 2), bw, bh)
+                    .tooltip(Tooltip.of(raceTooltip(r))).build();
+            b.active = !d.hasRace();
+            addDrawableChild(b);
+        }
+    }
+
+    private static Text raceTooltip(com.europa.rpg.race.Race r) {
+        MutableText t = Text.translatable(r.translationKey()).formatted(r.color(), Formatting.BOLD).append("\n")
+                .append(Text.translatable(r.translationKey() + ".desc").formatted(Formatting.GRAY, Formatting.ITALIC)).append("\n");
+        com.europa.rpg.race.Race.Traits tr = r.traits();
+        if (r.scale() != 1.0) t.append("\n").append(Text.translatable("rpg.europa.trait.scale", fmt(r.scale() * 100) + "%").formatted(Formatting.WHITE));
+        trait(t, "health", tr.health(), false);
+        trait(t, "armor", tr.armor(), false);
+        trait(t, "toughness", tr.toughness(), false);
+        trait(t, "damage", tr.damage(), false);
+        trait(t, "speed", tr.speed() * 1000, true);
+        trait(t, "luck", tr.luck(), false);
+        trait(t, "mana", tr.mana(), false);
+        trait(t, "mana_regen", tr.manaRegen(), false);
+        trait(t, "crit", tr.crit() * 100, true);
+        trait(t, "power", tr.power() * 100, true);
+        trait(t, "cooldown", tr.cooldown() * 100, true);
+        trait(t, "xp", tr.xp() * 100, true);
+        t.append("\n").append(Text.translatable("rpg.europa.screen.passive").formatted(Formatting.YELLOW))
+                .append(Text.translatable(r.translationKey() + ".passive").formatted(Formatting.WHITE));
+        t.append("\n\n").append(Text.translatable("rpg.europa.racial_label").formatted(Formatting.YELLOW)).append(abilityText(r.ability()));
+        return t;
+    }
+
+    private static void trait(MutableText t, String key, double v, boolean percent) {
+        if (v == 0) return;
+        String n = (v > 0 ? "+" : "") + fmt(v) + (percent ? "%" : "");
+        t.append("\n").append(Text.translatable("rpg.europa.trait." + key, n).formatted(v > 0 ? Formatting.GREEN : Formatting.RED));
+    }
+
+    private void renderRace(DrawContext ctx) {
+        PlayerRpgData d = data();
+        int x = left + 10;
+        Text head = d.hasRace() ? Text.translatable("rpg.europa.race_locked") : Text.translatable("rpg.europa.choose_race");
+        ctx.drawTextWithShadow(textRenderer, head.copy().formatted(d.hasRace() ? Formatting.GRAY : Formatting.GOLD), x, top + 30, 0xFFFFFF);
+        com.europa.rpg.race.Race r = com.europa.rpg.race.Races.of(d);
+        if (r == null) {
+            ctx.drawTextWithShadow(textRenderer, Text.translatable("rpg.europa.screen.hover_race").formatted(Formatting.DARK_GRAY), x, top + H - 16, 0xFFFFFF);
+            return;
+        }
+        int y = top + 172;
+        ctx.drawTextWithShadow(textRenderer, Text.translatable(r.translationKey()).formatted(r.color(), Formatting.BOLD)
+                .append(Text.literal(" — ").formatted(Formatting.DARK_GRAY))
+                .append(Text.translatable(r.translationKey() + ".passive").formatted(Formatting.WHITE)), x, y, 0xFFFFFF);
+        AbilityDef def = Abilities.get(r.ability());
+        if (def != null) drawAbility(ctx, x, y + 14, "V", def, d);
+    }
+
+    // ------------------------------------------------------------------ facções
+
+    private void renderFactions(DrawContext ctx) {
+        PlayerRpgData d = data();
+        int x = left + 10, y = top + 30;
+        for (com.europa.rpg.economy.Factions.Faction f : com.europa.rpg.economy.Factions.ALL) {
+            int rep = com.europa.rpg.economy.Factions.rep(d, f.id());
+            int rank = com.europa.rpg.economy.Factions.rank(rep);
+            int[] th = com.europa.rpg.economy.Factions.RANK_THRESHOLDS;
+            int next = rank + 1 < th.length ? th[rank + 1] : com.europa.rpg.economy.Factions.MAX_REP;
+            float frac = rank + 1 < th.length ? (rep - th[rank]) / (float) (next - th[rank]) : 1f;
+            ctx.drawItem(new ItemStack(Registries.ITEM.get(Identifier.of(f.icon()))), x, y + 4);
+            ctx.drawTextWithShadow(textRenderer, Text.translatable(f.translationKey()).formatted(f.color(), Formatting.BOLD)
+                    .append(Text.literal("  ").append(Text.translatable(com.europa.rpg.economy.Factions.rankKey(rank))).formatted(Formatting.YELLOW)), x + 20, y, 0xFFFFFF);
+            bar(ctx, x + 250, y + 2, 110, 5, frac, 0xFF4DD2A0);
+            ctx.drawTextWithShadow(textRenderer, Text.literal(rep + "/" + next).formatted(Formatting.GRAY), x + 250, y + 10, 0xFFFFFF);
+            int ly = y + 11;
+            for (OrderedText l : textRenderer.wrapLines(Text.translatable(f.translationKey() + ".desc").formatted(Formatting.GRAY), 220)) {
+                ctx.drawTextWithShadow(textRenderer, l, x + 20, ly, 0xFFFFFF);
+                ly += 9;
+            }
+            y += 46;
+        }
+        ctx.drawCenteredTextWithShadow(textRenderer, Text.translatable("rpg.europa.faction.hint").formatted(Formatting.DARK_GRAY), left + W / 2, top + H - 12, 0xFFFFFF);
     }
 
     // ------------------------------------------------------------------ comum
@@ -366,9 +502,16 @@ public class CharacterScreen extends Screen {
         super.render(ctx, mouseX, mouseY, delta);
         switch (tab) {
             case TAB_SHEET -> renderSheet(ctx);
+            case TAB_RACE -> renderRace(ctx);
+            case TAB_FACTIONS -> renderFactions(ctx);
             case TAB_TALENTS -> renderTalents(ctx);
             case TAB_BLESSING -> renderBlessing(ctx);
-            case TAB_PROFESSIONS -> renderProfessions(ctx);
+            case TAB_PROFESSIONS -> {
+                hoverX = mouseX;
+                hoverY = mouseY;
+                renderProfessions(ctx);
+                if (perkTooltip != null) ctx.drawOrderedTooltip(textRenderer, perkTooltip, mouseX, mouseY);
+            }
             default -> {}
         }
     }
