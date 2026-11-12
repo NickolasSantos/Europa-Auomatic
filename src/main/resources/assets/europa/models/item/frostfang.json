@@ -2,5 +2,19 @@
   "parent": "minecraft:item/handheld",
   "textures": {
     "layer0": "europa:item/frostfang"
-  }
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "europa:stage": 0.5
+      },
+      "model": "europa:item/frostfang_awakened"
+    },
+    {
+      "predicate": {
+        "europa:stage": 1.0
+      },
+      "model": "europa:item/frostfang_ascended"
+    }
+  ]
 }

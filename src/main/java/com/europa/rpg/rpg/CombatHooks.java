@@ -77,6 +77,7 @@ public final class CombatHooks {
             if (entity instanceof ServerPlayerEntity victim && taken > 0) {
                 Progression.markCombat(victim);
                 Progression.gain(victim, com.europa.rpg.rpg.Resource.FURY, 4f);
+                com.europa.rpg.item.GearProgress.onHurt(victim, taken);
             }
             if (taken <= 0 || !(source.getAttacker() instanceof ServerPlayerEntity p) || p == entity) return;
             PlayerRpgData d = RpgAttachments.get(p);

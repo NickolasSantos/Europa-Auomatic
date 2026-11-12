@@ -22,7 +22,6 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.random.Random;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -99,30 +98,56 @@ public final class RarityRoller {
     }
 
     public static ItemStack apply(ItemStack stack, Rarity rarity, Random random) {
-        boolean armor = stack.getItem() instanceof ArmorItem;
-        AttributeModifierSlot slot = armor ? AttributeModifierSlot.forEquipmentSlot(((ArmorItem) stack.getItem()).getSlotType()) : AttributeModifierSlot.MAINHAND;
-        String slotName = armor ? ((ArmorItem) stack.getItem()).getSlotType().getName() : "mainhand";
-
-        AttributeModifiersComponent mods = stack.get(DataComponentTypes.ATTRIBUTE_MODIFIERS);
-        if (mods == null || mods.modifiers().isEmpty()) mods = stack.getItem().getAttributeModifiers();
-
-        NbtCompound gear = new NbtCompound();
-        gear.putString("rarity", rarity.id());
-        List<Affix> pool = new ArrayList<>(armor ? ARMOR : WEAPON);
-        Collections.shuffle(pool, new java.util.Random(random.nextLong()));
-        for (int i = 0; i < Math.min(rarity.affixes, pool.size()); i++) {
-            Affix a = pool.get(i);
-            double value = (a.min + random.nextDouble() * (a.max - a.min)) * rarity.scale;
-            if (a.special != null) {
-                gear.putDouble(a.special, gear.getDouble(a.special) + value);
-            } else {
-                mods = mods.with(a.attr, new EntityAttributeModifier(EuropaRPG.id("affix/" + slotName + "/" + a.id), value,
-                        EntityAttributeModifier.Operation.ADD_VALUE), slot);
-            }
-        }
-        stack.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, mods);
-        NbtComponent.set(DataComponentTypes.CUSTOM_DATA, stack, nbt -> nbt.put(KEY, gear));
+        setRarity(stack, rarity);
+        for (int i = 0; i < rarity.affixes; i++) addAffix(stack, random);
         return stack;
+    }
+
+    static NbtCompound gear(ItemStack stack) {
+        NbtComponent c = stack.get(DataComponentTypes.CUSTOM_DATA);
+        return c == null ? new NbtCompound() : c.copyNbt().getCompound(KEY);
+    }
+
+    static void writeGear(ItemStack stack, NbtCompound gear) {
+        NbtComponent.set(DataComponentTypes.CUSTOM_DATA, stack, nbt -> nbt.put(KEY, gear));
+    }
+
+    /** Define a raridade (sem novos afixos). Épico ou acima ganha brilho de encantamento. */
+    public static void setRarity(ItemStack stack, Rarity rarity) {
+        NbtCompound g = gear(stack);
+        g.putString("rarity", rarity.id());
+        writeGear(stack, g);
+        if (rarity.ordinal() >= Rarity.EPIC.ordinal()) stack.set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
+    }
+
+    /** Adiciona um afixo ainda não presente no item, escalado pela raridade atual. Retorna false se não houver mais. */
+    public static boolean addAffix(ItemStack stack, Random random) {
+        Rarity rarity = rarityOf(stack);
+        if (rarity == null) rarity = Rarity.COMMON;
+        boolean armor = stack.getItem() instanceof ArmorItem;
+        NbtCompound g = gear(stack);
+        net.minecraft.nbt.NbtList used = g.getList("affixes", net.minecraft.nbt.NbtElement.STRING_TYPE);
+        java.util.Set<String> taken = new java.util.HashSet<>();
+        for (int i = 0; i < used.size(); i++) taken.add(used.getString(i));
+        List<Affix> pool = new ArrayList<>((armor ? ARMOR : WEAPON).stream().filter(a -> !taken.contains(a.id)).toList());
+        if (pool.isEmpty()) return false;
+        Affix a = pool.get(random.nextInt(pool.size()));
+        double value = (a.min + random.nextDouble() * (a.max - a.min)) * Math.max(1.0, rarity.scale);
+        if (a.special != null) {
+            g.putDouble(a.special, g.getDouble(a.special) + value);
+        } else {
+            AttributeModifierSlot slot = armor ? AttributeModifierSlot.forEquipmentSlot(((ArmorItem) stack.getItem()).getSlotType()) : AttributeModifierSlot.MAINHAND;
+            String slotName = armor ? ((ArmorItem) stack.getItem()).getSlotType().getName() : "mainhand";
+            AttributeModifiersComponent mods = stack.get(DataComponentTypes.ATTRIBUTE_MODIFIERS);
+            if (mods == null || mods.modifiers().isEmpty()) mods = stack.getItem().getAttributeModifiers();
+            mods = mods.with(a.attr, new EntityAttributeModifier(EuropaRPG.id("affix/" + slotName + "/" + a.id), value,
+                    EntityAttributeModifier.Operation.ADD_VALUE), slot);
+            stack.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, mods);
+        }
+        used.add(net.minecraft.nbt.NbtString.of(a.id));
+        g.put("affixes", used);
+        writeGear(stack, g);
+        return true;
     }
 
     /** Valor de venda de equipamento com raridade (Fragmentos de Aster). */

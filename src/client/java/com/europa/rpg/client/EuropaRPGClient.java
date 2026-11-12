@@ -18,10 +18,10 @@ import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 
 public class EuropaRPGClient implements ClientModInitializer {
-    private static KeyBinding primaryKey;
-    private static KeyBinding ultimateKey;
-    private static KeyBinding characterKey;
-    private static KeyBinding racialKey;
+    static KeyBinding primaryKey;
+    static KeyBinding ultimateKey;
+    static KeyBinding characterKey;
+    static KeyBinding racialKey;
 
     @Override
     public void onInitializeClient() {
@@ -35,7 +35,9 @@ public class EuropaRPGClient implements ClientModInitializer {
             while (primaryKey.wasPressed()) ClientPlayNetworking.send(new CastAbilityPayload(AbilityHandler.PRIMARY));
             while (ultimateKey.wasPressed()) ClientPlayNetworking.send(new CastAbilityPayload(AbilityHandler.ULTIMATE));
             while (racialKey.wasPressed()) ClientPlayNetworking.send(new CastAbilityPayload(AbilityHandler.RACIAL));
-            while (characterKey.wasPressed()) client.setScreen(new CharacterScreen(-1));
+            while (characterKey.wasPressed()) {
+                client.setScreen(ClientRpgState.full.hasClass() ? new CharacterScreen(-1) : new ClassPickerScreen());
+            }
             ClientRpgState.tick();
         });
 
@@ -45,6 +47,7 @@ public class EuropaRPGClient implements ClientModInitializer {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> ClientRpgState.reset());
 
         HudRenderCallback.EVENT.register(RpgHud::render);
+        GearVisuals.init();
         net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback.EVENT.register(RarityTooltip::append);
         EntityRendererRegistry.register(ModEntities.CATACOMB_LORD, CatacombLordRenderer::new);
         EntityRendererRegistry.register(ModEntities.SERVANT, ServantRenderer::new);

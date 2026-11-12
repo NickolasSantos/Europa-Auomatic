@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "europa:item/mithril_sword_awakened"
+  }
+}

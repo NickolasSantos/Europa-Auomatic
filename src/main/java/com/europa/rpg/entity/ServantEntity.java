@@ -116,7 +116,7 @@ public class ServantEntity extends ZombieEntity {
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
         if (nbt.containsUuid("Owner")) ownerUuid = nbt.getUuid("Owner");
-        lifetime = nbt.getInt("Lifetime");
+        if (nbt.contains("Lifetime")) lifetime = nbt.getInt("Lifetime"); // invocado por comando/ovo: mantém o padrão
     }
 
     private class FollowOwnerGoal extends Goal {

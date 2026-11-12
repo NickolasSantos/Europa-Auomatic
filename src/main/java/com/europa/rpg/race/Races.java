@@ -67,24 +67,24 @@ public final class Races {
         Spell.of("starfall", 0, 30).areaAt(20, 3).magic(7).status(GLOWING, 10, 0).particle(ParticleTypes.END_ROD).sound(SoundEvents.ENTITY_FIREWORK_ROCKET_TWINKLE, 1f).register();
 
         // Raças: escala, traços (positivos e limitações), habilidade
-        Race.register("human", WHITE, 1.0, b().xp(0.10).build(), "determination");
-        Race.register("elf", GREEN, 1.0, b().speed(0.01).crit(0.03).health(-2).build(), "elven_grace");
-        Race.register("dwarf", GOLD, 0.85, b().health(4).armor(2).speed(-0.005).build(), "stoneskin");
-        Race.register("orc", DARK_GREEN, 1.08, b().health(2).damage(1.5).mana(-20).build(), "war_cry");
-        Race.register("tiefling", RED, 1.0, b().mana(15).health(-2).build(), "infernal_rebuke");
-        Race.register("dragonborn", DARK_RED, 1.1, b().health(2).armor(2).speed(-0.005).build(), "breath_of_ancestors");
-        Race.register("halfling", YELLOW, 0.7, b().luck(2).speed(0.01).health(-4).build(), "lucky_escape");
-        Race.register("feyborn", LIGHT_PURPLE, 0.9, b().mana(30).manaRegen(0.5f).armor(-2).build(), "fey_blink");
-        Race.register("reborn", GRAY, 1.0, b().health(-2).build(), "deathless");
-        Race.register("vitrean", AQUA, 1.0, b().crit(0.05).manaRegen(0.5f).armor(-4).build(), "prismatic_flash");
-        Race.register("mycelian", DARK_PURPLE, 0.95, b().health(2).build(), "spore_cloud");
-        Race.register("umbral", DARK_GRAY, 1.0, b().build(), "shadow_meld");
-        Race.register("porcelain", WHITE, 1.0, b().toughness(3).mana(20).health(-4).build(), "glaze");
-        Race.register("abyssal", DARK_AQUA, 1.0, b().health(-2).build(), "tidal_surge");
-        Race.register("verdan", GREEN, 1.0, b().luck(1).build(), "photosynthesis");
-        Race.register("horologist", GOLD, 1.0, b().cooldown(0.08).speed(-0.005).build(), "rewind");
-        Race.register("inkling", BLUE, 0.9, b().mana(15).armor(-2).build(), "ink_splash");
-        Race.register("astrarian", LIGHT_PURPLE, 1.0, b().power(0.05).manaRegen(0.5f).health(-2).build(), "starfall");
+        Race.register("human", WHITE, 1.0, b().xp(0.10).build(), "determination", "minecraft:shield");
+        Race.register("elf", GREEN, 1.0, b().speed(0.01).crit(0.03).health(-2).build(), "elven_grace", "minecraft:bow");
+        Race.register("dwarf", GOLD, 0.85, b().health(4).armor(2).speed(-0.005).build(), "stoneskin", "minecraft:iron_pickaxe");
+        Race.register("orc", DARK_GREEN, 1.08, b().health(2).damage(1.5).mana(-20).build(), "war_cry", "minecraft:iron_axe");
+        Race.register("tiefling", RED, 1.0, b().mana(15).health(-2).build(), "infernal_rebuke", "minecraft:blaze_powder");
+        Race.register("dragonborn", DARK_RED, 1.1, b().health(2).armor(2).speed(-0.005).build(), "breath_of_ancestors", "minecraft:dragon_breath");
+        Race.register("halfling", YELLOW, 0.7, b().luck(2).speed(0.01).health(-4).build(), "lucky_escape", "minecraft:sweet_berries");
+        Race.register("feyborn", LIGHT_PURPLE, 0.9, b().mana(30).manaRegen(0.5f).armor(-2).build(), "fey_blink", "minecraft:pink_petals");
+        Race.register("reborn", GRAY, 1.0, b().health(-2).build(), "deathless", "minecraft:bone");
+        Race.register("vitrean", AQUA, 1.0, b().crit(0.05).manaRegen(0.5f).armor(-4).build(), "prismatic_flash", "minecraft:glass");
+        Race.register("mycelian", DARK_PURPLE, 0.95, b().health(2).build(), "spore_cloud", "minecraft:red_mushroom");
+        Race.register("umbral", DARK_GRAY, 1.0, b().build(), "shadow_meld", "minecraft:black_candle");
+        Race.register("porcelain", WHITE, 1.0, b().toughness(3).mana(20).health(-4).build(), "glaze", "minecraft:decorated_pot");
+        Race.register("abyssal", DARK_AQUA, 1.0, b().health(-2).build(), "tidal_surge", "minecraft:nautilus_shell");
+        Race.register("verdan", GREEN, 1.0, b().luck(1).build(), "photosynthesis", "minecraft:fern");
+        Race.register("horologist", GOLD, 1.0, b().cooldown(0.08).speed(-0.005).build(), "rewind", "minecraft:clock");
+        Race.register("inkling", BLUE, 0.9, b().mana(15).armor(-2).build(), "ink_splash", "minecraft:ink_sac");
+        Race.register("astrarian", LIGHT_PURPLE, 1.0, b().power(0.05).manaRegen(0.5f).health(-2).build(), "starfall", "minecraft:end_crystal");
     }
 
     /** Passivas raciais — a cada segundo. */

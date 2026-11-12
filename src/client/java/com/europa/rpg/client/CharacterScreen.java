@@ -91,25 +91,8 @@ public class CharacterScreen extends Screen {
     private void initSheet() {
         PlayerRpgData d = data();
         if (!d.hasClass()) {
-            RpgClass.Category[] cats = RpgClass.Category.values();
-            int cw = (W - 20) / cats.length;
-            for (int i = 0; i < cats.length; i++) {
-                RpgClass.Category cat = cats[i];
-                ButtonWidget cb = ButtonWidget.builder(Text.translatable(cat.translationKey()), b -> {
-                    pickerCategory = cat;
-                    clearAndInit();
-                }).dimensions(left + 10 + i * cw, top + 44, cw - 2, 18).build();
-                cb.active = cat != pickerCategory;
-                addDrawableChild(cb);
-            }
-            List<RpgClass> classes = RpgClass.byCategory(pickerCategory);
-            int cols = 3, bw = 118, bh = 20;
-            for (int i = 0; i < classes.size(); i++) {
-                RpgClass c = classes.get(i);
-                int x = left + 10 + (i % cols) * (bw + 3), y = top + 72 + (i / cols) * (bh + 4);
-                addDrawableChild(ButtonWidget.builder(Text.translatable(c.translationKey()).formatted(c.color), b -> send(RpgActionPayload.CHOOSE_CLASS, c.id))
-                        .dimensions(x, y, bw, bh).tooltip(Tooltip.of(classTooltip(c))).build());
-            }
+            addDrawableChild(ButtonWidget.builder(Text.translatable("rpg.europa.screen.open_picker").formatted(Formatting.BOLD),
+                    b -> client.setScreen(new ClassPickerScreen())).dimensions(left + W / 2 - 80, top + 110, 160, 22).build());
             return;
         }
         if (d.level >= Progression.SUBCLASS_LEVEL && d.subclass == RpgSubclass.NONE) {
@@ -157,11 +140,11 @@ public class CharacterScreen extends Screen {
         PlayerRpgData d = data();
         int x = left + 10, y = top + 30;
         if (!d.hasClass()) {
-            ctx.drawCenteredTextWithShadow(textRenderer, Text.translatable("rpg.europa.choose_class").formatted(Formatting.GOLD), left + W / 2, y, 0xFFFFFF);
-            ctx.drawCenteredTextWithShadow(textRenderer, Text.translatable("rpg.europa.screen.hover_hint").formatted(Formatting.GRAY), left + W / 2, top + H - 16, 0xFFFFFF);
+            ctx.drawCenteredTextWithShadow(textRenderer, Text.translatable("rpg.europa.screen.no_class_yet").formatted(Formatting.GOLD), left + W / 2, top + 80, 0xFFFFFF);
             return;
         }
-        ctx.drawItem(new ItemStack(Registries.ITEM.get(Identifier.of(d.rpgClass.icon))), x, y);
+        ctx.fill(x - 1, y - 5, x + 21, y + 17, 0xFFB08D4A);
+        Portraits.draw(ctx, d.rpgClass, x, y - 4, 20);
         MutableText title = Text.translatable(d.rpgClass.translationKey()).formatted(d.rpgClass.color, Formatting.BOLD);
         if (d.subclass != RpgSubclass.NONE) title.append(Text.literal(" · ").formatted(Formatting.DARK_GRAY)).append(Text.translatable(d.subclass.translationKey()).formatted(d.subclass.color));
         ctx.drawTextWithShadow(textRenderer, title, x + 20, y + 4, 0xFFFFFF);

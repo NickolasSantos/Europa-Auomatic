@@ -2,5 +2,19 @@
   "parent": "minecraft:item/handheld",
   "textures": {
     "layer0": "europa:item/mithril_pickaxe"
-  }
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "europa:stage": 0.5
+      },
+      "model": "europa:item/mithril_pickaxe_awakened"
+    },
+    {
+      "predicate": {
+        "europa:stage": 1.0
+      },
+      "model": "europa:item/mithril_pickaxe_ascended"
+    }
+  ]
 }

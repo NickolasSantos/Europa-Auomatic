@@ -108,6 +108,7 @@ public class EuropaRPG implements ModInitializer {
             Progression.addXp(killer, xpFor(entity));
             QuestManager.onKill(killer, entity);
             Professions.onKill(killer, entity);
+            com.europa.rpg.item.GearProgress.onKill(killer, entity.getMaxHealth());
             Progression.gain(killer, com.europa.rpg.rpg.Resource.SPIRIT, 10f);
             if (entity.getType().isIn(net.minecraft.registry.tag.EntityTypeTags.UNDEAD)) Progression.gain(killer, com.europa.rpg.rpg.Resource.FAITH, 5f);
         });

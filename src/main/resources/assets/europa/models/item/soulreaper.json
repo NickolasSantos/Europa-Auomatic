@@ -2,5 +2,19 @@
   "parent": "minecraft:item/handheld",
   "textures": {
     "layer0": "europa:item/soulreaper"
-  }
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "europa:stage": 0.5
+      },
+      "model": "europa:item/soulreaper_awakened"
+    },
+    {
+      "predicate": {
+        "europa:stage": 1.0
+      },
+      "model": "europa:item/soulreaper_ascended"
+    }
+  ]
 }

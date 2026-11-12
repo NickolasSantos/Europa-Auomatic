@@ -7,6 +7,9 @@ As texturas são pixel-art procedural original (sem assets da Mojang). Re-execut
 import json
 import os
 import random
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from PIL import Image
 
@@ -576,65 +579,84 @@ def save(img, *path):
 
 
 def gen_textures():
-    stone, deep, nether = hexc("#7d7d7d"), hexc("#4a4a50"), hexc("#6e2a2a")
-    save(ore_tex(stone, 0.12, hexc("#f0fdff"), hexc("#5fa8c0"), 1), "block", "mithril_ore.png")
-    save(ore_tex(deep, 0.12, hexc("#f0fdff"), hexc("#5fa8c0"), 2), "block", "deepslate_mithril_ore.png")
-    save(ore_tex(deep, 0.14, hexc("#ff8a96"), hexc("#a01d33"), 3, clusters=4), "block", "adamantite_ore.png")
-    save(ore_tex(nether, 0.18, hexc("#b8fff4"), hexc("#2fb8a8"), 4), "block", "soulstone_ore.png")
-    save(block_tex(hexc("#f0fdff"), hexc("#8fd3e8"), hexc("#3f7f94"), 5), "block", "mithril_block.png")
-    save(block_tex(hexc("#ff8a96"), hexc("#c0283e"), hexc("#5a0f1d"), 6), "block", "adamantite_block.png")
+    import art
+    MITH, ADA = art.ramp("#8fd3e8"), art.ramp("#c0283e")
+    SOUL, NETH = art.ramp("#2fb8a8"), art.ramp("#7a2a2a")
+
+    # Blocos
+    stone = art.stone_base(1, "#7f7f7f")
+    deep = art.stone_base(2, "#4d4d55", deep=True)
+    netherrack = art.stone_base(3, "#6e2a2a", var=0.16)
+    save(art.ore(stone, MITH, 1), "block", "mithril_ore.png")
+    save(art.ore(deep, MITH, 2), "block", "deepslate_mithril_ore.png")
+    save(art.ore(deep, ADA, 3, clusters=4), "block", "adamantite_ore.png")
+    save(art.ore(netherrack, SOUL, 4), "block", "soulstone_ore.png")
+    save(art.storage_block(MITH, 5), "block", "mithril_block.png")
+    save(art.storage_block(ADA, 6), "block", "adamantite_block.png")
     save(quest_board_front(), "block", "quest_board_front.png")
     save(planks_tex(12), "block", "quest_board_side.png")
     save(planks_tex(13, "#7a4f26"), "block", "quest_board_top.png")
     save(altar_top(), "block", "boss_altar_top.png")
     save(altar_side(), "block", "boss_altar_side.png")
     save(noise_tex(hexc("#1f1f25"), 0.08, 23), "block", "boss_altar_bottom.png")
-
-    for mat, colors in MATERIALS.items():
-        p = pal({**colors, **HANDLE})
-        save(from_template(SWORD, p), "item", f"{mat}_sword.png")
-        save(from_template(PICKAXE, p), "item", f"{mat}_pickaxe.png")
-        save(from_template(AXE, p), "item", f"{mat}_axe.png")
-        save(from_template(SHOVEL, p), "item", f"{mat}_shovel.png")
-        save(from_template(HELMET, p), "item", f"{mat}_helmet.png")
-        save(from_template(CHESTPLATE, p), "item", f"{mat}_chestplate.png")
-        save(from_template(LEGGINGS, p), "item", f"{mat}_leggings.png")
-        save(from_template(BOOTS, p), "item", f"{mat}_boots.png")
-        save(from_template(INGOT, p), "item", f"{mat}_ingot.png")
-        save(from_template(RAW, p), "item", f"raw_{mat}.png")
-    save(from_template(SHARD, pal({"o": "#0b2a2a", "b": "#e6fffb", "m": "#2fb8a8"})), "item", "soul_shard.png")
-
-    legend = {
-        "flamebrand": (SWORD, {"o": "#4a1500", "b": "#fff1a8", "m": "#ff6a00", "g": "#ffb000", "h": "#3b1f0f", "j": "#2a160a"}),
-        "frostfang": (SWORD, {"o": "#0d2a4a", "b": "#ffffff", "m": "#6ec6ff", "g": "#b0e0ff", "h": "#33506b", "j": "#22384d"}),
-        "soulreaper": (SWORD, {"o": "#0b2a2a", "b": "#b8fff4", "m": "#2fb8a8", "g": "#7b2fbe", "h": "#241b2e", "j": "#160f1c"}),
-        "stormbreaker": (HAMMER, {"o": "#1b1b3a", "b": "#fff59d", "m": "#7f7fff", "h": "#5b4a3a", "j": "#3a2e24"}),
-        "arcane_staff": (STAFF, {"o": "#2a0b3a", "b": "#e0b3ff", "g": "#9b4dff", "h": "#5b3a1e"}),
-        "catacomb_key": (KEY, {"o": "#2a1f0a", "b": "#fff1a8", "m": "#c9a227"}),
-        "rebirth_tome": (BOOK, {"o": "#1a0f24", "b": "#7b2fbe", "m": "#4b1c75", "g": "#ffd27f", "p": "#efe2c0"}),
-    }
-    for name, (tpl, colors) in legend.items():
-        save(from_template(tpl, pal(colors)), "item", f"{name}.png")
-
-    save(armor_layer("#8fd3e8", "#5fa8c0", 31), "models", "armor", "mithril_layer_1.png")
-    save(armor_layer("#7cc3d8", "#4f98b0", 32), "models", "armor", "mithril_layer_2.png")
-    save(armor_layer("#c0283e", "#8e1a2c", 33), "models", "armor", "adamantite_layer_1.png")
-    save(armor_layer("#a82236", "#701526", 34), "models", "armor", "adamantite_layer_2.png")
-    save(boss_texture(), "entity", "catacomb_lord.png")
-    save(servant_texture(), "entity", "servant.png")
     save(shrine_top(), "block", "shrine_top.png")
-    save(from_template(STAR, pal({"o": "#3a2a6b", "b": "#fff6c2", "m": "#b98cff"})), "item", "aster_fragment.png")
-    save(from_template(PRISM, pal({"o": "#2a1f5a", "b": "#f4ecff", "m": "#9b7bff", "d": "#5a3fb8"})), "item", "aster_prism.png")
-    save(counter_top(), "block", "merchant_counter_top.png")
-    save(counter_side(), "block", "merchant_counter_side.png")
     save(shrine_side(), "block", "shrine_side.png")
     save(noise_tex(hexc("#6a6a6a"), 0.07, 43), "block", "shrine_bottom.png")
+    save(counter_top(), "block", "merchant_counter_top.png")
+    save(counter_side(), "block", "merchant_counter_side.png")
 
-    icon = from_template(SWORD, pal(legend["soulreaper"][1])).resize((128, 128), Image.NEAREST)
+    # Itens com evolução visual (base, desperto, ascendido)
+    gear = {}
+    for mat, r in (("mithril", MITH), ("adamantite", ADA)):
+        gear[f"{mat}_sword"] = art.sword(r)
+        gear[f"{mat}_pickaxe"] = art.pickaxe(r)
+        gear[f"{mat}_axe"] = art.axe(r)
+        gear[f"{mat}_shovel"] = art.shovel(r)
+        gear[f"{mat}_helmet"] = art.armor_icon(art.HELMET, r, art.GOLD if mat == "adamantite" else None)
+        gear[f"{mat}_chestplate"] = art.armor_icon(art.CHEST, r, art.GOLD if mat == "adamantite" else None)
+        gear[f"{mat}_leggings"] = art.armor_icon(art.LEGS, r)
+        gear[f"{mat}_boots"] = art.armor_icon(art.BOOTS, r)
+        save(art.ingot(r), "item", f"{mat}_ingot.png")
+        save(art.raw_chunk(r, 7 if mat == "mithril" else 8), "item", f"raw_{mat}.png")
+    gear["flamebrand"] = art.sword(art.ramp("#ff7a1a"), art.ramp("#ffb000"), art.ramp("#3b1f0f"))
+    gear["frostfang"] = art.sword(art.ramp("#7fd0ff"), art.ramp("#b0e0ff"), art.ramp("#33506b"))
+    gear["soulreaper"] = art.sword(art.ramp("#2fb8a8"), art.ramp("#7b2fbe"), art.ramp("#241b2e"), long=True)
+    gear["stormbreaker"] = art.hammer(art.ramp("#8f8fff"), art.ramp("#fff59d"))
+    gear["arcane_staff"] = art.staff(art.ramp("#b366ff"))
+    for name, img in gear.items():
+        save(img, "item", f"{name}.png")
+        save(art.stage_variant(img, 1, hexc("#ffd84d"), hexc("#ffe58a")), "item", f"{name}_awakened.png")
+        save(art.stage_variant(img, 2, hexc("#c77dff"), hexc("#ffe58a")), "item", f"{name}_ascended.png")
+
+    save(art.crystal(SOUL), "item", "soul_shard.png")
+    save(art.key(), "item", "catacomb_key.png")
+    save(art.book(art.ramp("#5a2a8a"), art.GOLD), "item", "rebirth_tome.png")
+    save(art.star(art.ramp("#c9a6ff")), "item", "aster_fragment.png")
+    save(art.prism(art.ramp("#9b7bff")), "item", "aster_prism.png")
+
+    # Armaduras no corpo
+    for mat, r, trim, acc in (("mithril", MITH, art.ramp("#e8f8ff"), art.ramp("#4fd1ff")),
+                              ("adamantite", ADA, art.GOLD, art.ramp("#ffcf4d"))):
+        l1, l2 = art.armor_layers(r, trim, acc)
+        save(l1, "models", "armor", f"{mat}_layer_1.png")
+        save(l2, "models", "armor", f"{mat}_layer_2.png")
+
+    # Entidades
+    save(art.skeleton_boss(), "entity", "catacomb_lord.png")
+    save(art.servant(), "entity", "servant.png")
+
+    icon = gear["soulreaper"].resize((128, 128), Image.NEAREST)
     bg = Image.new("RGBA", (128, 128), hexc("#1c1824"))
     bg.alpha_composite(icon)
     os.makedirs(ASSETS, exist_ok=True)
     bg.save(os.path.join(ASSETS, "icon.png"))
+
+
+STAGED_ITEMS = ["mithril_sword", "mithril_pickaxe", "mithril_axe", "mithril_shovel",
+                "adamantite_sword", "adamantite_pickaxe", "adamantite_axe", "adamantite_shovel",
+                "mithril_helmet", "mithril_chestplate", "mithril_leggings", "mithril_boots",
+                "adamantite_helmet", "adamantite_chestplate", "adamantite_leggings", "adamantite_boots",
+                "flamebrand", "frostfang", "soulreaper", "stormbreaker", "arcane_staff"]
 
 
 # ----------------------------------------------------------------------------- modelos / blockstates
@@ -679,10 +701,16 @@ def gen_models():
     write_json(os.path.join(bs, "merchant_counter.json"), {"variants": {"": {"model": f"{MOD}:block/merchant_counter"}}})
     write_json(os.path.join(im, "merchant_counter.json"), {"parent": f"{MOD}:block/merchant_counter"})
 
-    for i in GENERATED_ITEMS:
-        write_json(os.path.join(im, i + ".json"), {"parent": "minecraft:item/generated", "textures": {"layer0": f"{MOD}:item/{i}"}})
-    for i in HANDHELD_ITEMS:
-        write_json(os.path.join(im, i + ".json"), {"parent": "minecraft:item/handheld", "textures": {"layer0": f"{MOD}:item/{i}"}})
+    for i in GENERATED_ITEMS + HANDHELD_ITEMS:
+        parent = "minecraft:item/handheld" if i in HANDHELD_ITEMS else "minecraft:item/generated"
+        model = {"parent": parent, "textures": {"layer0": f"{MOD}:item/{i}"}}
+        if i in STAGED_ITEMS:
+            for stage in ("awakened", "ascended"):
+                write_json(os.path.join(im, f"{i}_{stage}.json"), {"parent": parent, "textures": {"layer0": f"{MOD}:item/{i}_{stage}"}})
+            model["overrides"] = [
+                {"predicate": {"europa:stage": 0.5}, "model": f"{MOD}:item/{i}_awakened"},
+                {"predicate": {"europa:stage": 1.0}, "model": f"{MOD}:item/{i}_ascended"}]
+        write_json(os.path.join(im, i + ".json"), model)
     write_json(os.path.join(im, "catacomb_lord_spawn_egg.json"), {"parent": "minecraft:item/template_spawn_egg"})
 
 

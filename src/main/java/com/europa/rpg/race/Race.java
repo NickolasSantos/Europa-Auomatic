@@ -10,7 +10,7 @@ import java.util.Map;
  * Raça: escala corporal (aparência), bônus e limitações de atributos, uma passiva (em {@link Races})
  * e uma habilidade racial ativa (tecla V). Nenhuma raça é exigida por classe alguma.
  */
-public record Race(String id, Formatting color, double scale, Traits traits, String ability) {
+public record Race(String id, Formatting color, double scale, Traits traits, String ability, String icon) {
     /** Modificadores fixos. Valores negativos são as limitações. */
     public record Traits(double health, double armor, double toughness, double damage, double speed, double luck,
                          float mana, float manaRegen, double crit, double power, double cooldown, double xp) {
@@ -37,8 +37,8 @@ public record Race(String id, Formatting color, double scale, Traits traits, Str
 
     private static final Map<String, Race> ALL = new LinkedHashMap<>();
 
-    public static Race register(String id, Formatting color, double scale, Traits traits, String ability) {
-        Race r = new Race(id, color, scale, traits, ability);
+    public static Race register(String id, Formatting color, double scale, Traits traits, String ability, String icon) {
+        Race r = new Race(id, color, scale, traits, ability, icon);
         if (ALL.put(id, r) != null) throw new IllegalStateException("Raça duplicada: " + id);
         return r;
     }

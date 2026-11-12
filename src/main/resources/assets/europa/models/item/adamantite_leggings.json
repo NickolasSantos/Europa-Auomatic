@@ -2,5 +2,19 @@
   "parent": "minecraft:item/generated",
   "textures": {
     "layer0": "europa:item/adamantite_leggings"
-  }
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "europa:stage": 0.5
+      },
+      "model": "europa:item/adamantite_leggings_awakened"
+    },
+    {
+      "predicate": {
+        "europa:stage": 1.0
+      },
+      "model": "europa:item/adamantite_leggings_ascended"
+    }
+  ]
 }
