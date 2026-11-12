@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "id": "europa-gametest",
+  "version": "1.0.0",
+  "name": "Europa RPG GameTests",
+  "environment": "*",
+  "entrypoints": { "fabric-gametest": ["com.europa.rpg.test.EuropaGameTests"] },
+  "depends": { "europa": "*", "fabric-gametest-api-v1": "*" }
+}

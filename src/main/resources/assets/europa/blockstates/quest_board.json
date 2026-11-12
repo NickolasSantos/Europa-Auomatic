@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "europa:block/quest_board"
+    },
+    "facing=east": {
+      "model": "europa:block/quest_board",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "europa:block/quest_board",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "europa:block/quest_board",
+      "y": 270
+    }
+  }
+}

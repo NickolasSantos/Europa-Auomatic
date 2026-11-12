@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " # ",
+    " | ",
+    " | "
+  ],
+  "key": {
+    "#": {
+      "item": "europa:adamantite_ingot"
+    },
+    "|": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "id": "europa:adamantite_shovel",
+    "count": 1
+  }
+}

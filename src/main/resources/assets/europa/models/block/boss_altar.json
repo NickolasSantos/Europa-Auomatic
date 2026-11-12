@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "europa:block/boss_altar_top",
+    "side": "europa:block/boss_altar_side",
+    "bottom": "europa:block/boss_altar_bottom"
+  }
+}

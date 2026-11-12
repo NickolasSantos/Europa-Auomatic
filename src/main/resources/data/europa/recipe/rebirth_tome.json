@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " S ",
+    "SBS",
+    " D "
+  ],
+  "key": {
+    "S": {
+      "item": "europa:soul_shard"
+    },
+    "B": {
+      "item": "minecraft:book"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    }
+  },
+  "result": {
+    "id": "europa:rebirth_tome",
+    "count": 1
+  }
+}

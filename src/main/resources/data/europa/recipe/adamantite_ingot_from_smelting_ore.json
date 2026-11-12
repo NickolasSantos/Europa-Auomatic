@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "ingredient": {
+    "item": "europa:adamantite_ore"
+  },
+  "result": {
+    "id": "europa:adamantite_ingot"
+  },
+  "experience": 1.2,
+  "cookingtime": 200
+}

@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "europa:mithril_sword",
+    "europa:adamantite_sword",
+    "europa:flamebrand",
+    "europa:frostfang",
+    "europa:soulreaper",
+    "europa:stormbreaker"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "europa",
+  "version": "${version}",
+  "name": "Europa RPG",
+  "description": "RPG para Minecraft: classes, subclasses, poderes únicos, missões, equipamentos lendários, minérios próprios e dungeons.",
+  "authors": ["NickolasSantos"],
+  "license": "MIT",
+  "icon": "assets/europa/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.europa.rpg.EuropaRPG"],
+    "client": ["com.europa.rpg.client.EuropaRPGClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}

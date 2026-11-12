@@ -1,0 +1,69 @@
+plugins {
+    id 'fabric-loom' version "${loom_version}"
+    id 'maven-publish'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base { archivesName = project.archives_base_name }
+
+repositories {}
+
+sourceSets {
+    gametest {
+        compileClasspath += main.compileClasspath + main.output
+        runtimeClasspath += main.runtimeClasspath + main.output
+    }
+}
+
+loom {
+    splitEnvironmentSourceSets()
+    runs {
+        // ./gradlew runGametest — executa os testes de jogo num servidor headless e encerra.
+        gametest {
+            server()
+            name "Game Test"
+            vmArg "-Dfabric-api.gametest"
+            vmArg "-Dfabric-api.gametest.report-file=${project.layout.buildDirectory.get()}/gametest/junit.xml"
+            runDir "build/gametest"
+            source sourceSets.gametest
+        }
+    }
+    mods {
+        "europa" {
+            sourceSet sourceSets.main
+            sourceSet sourceSets.client
+        }
+        "europa-gametest" {
+            sourceSet sourceSets.gametest
+        }
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+}
+
+processResources {
+    inputs.property "version", project.version
+    filesMatching("fabric.mod.json") { expand "version": project.version }
+}
+
+tasks.withType(JavaCompile).configureEach { it.options.release = 21 }
+
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+jar {
+    from("LICENSE") { rename { "${it}_${project.base.archivesName.get()}" } }
+}
+
+// Permite enviar comandos ao servidor de desenvolvimento via stdin (útil para testes automatizados).
+tasks.named("runServer") { standardInput = System.in }

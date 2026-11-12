@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "europa:mithril_helmet",
+    "europa:mithril_chestplate",
+    "europa:mithril_leggings",
+    "europa:mithril_boots",
+    "europa:adamantite_helmet",
+    "europa:adamantite_chestplate",
+    "europa:adamantite_leggings",
+    "europa:adamantite_boots"
+  ]
+}

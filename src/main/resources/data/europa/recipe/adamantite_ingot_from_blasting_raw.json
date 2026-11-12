@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "ingredient": {
+    "item": "europa:raw_adamantite"
+  },
+  "result": {
+    "id": "europa:adamantite_ingot"
+  },
+  "experience": 1.2,
+  "cookingtime": 100
+}

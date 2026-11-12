@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "ingredient": {
+    "item": "europa:soulstone_ore"
+  },
+  "result": {
+    "id": "europa:soul_shard"
+  },
+  "experience": 1.0,
+  "cookingtime": 200
+}

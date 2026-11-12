@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " S ",
+    "SAS",
+    " G "
+  ],
+  "key": {
+    "S": {
+      "item": "europa:soul_shard"
+    },
+    "A": {
+      "item": "europa:adamantite_ingot"
+    },
+    "G": {
+      "item": "minecraft:gold_ingot"
+    }
+  },
+  "result": {
+    "id": "europa:catacomb_key",
+    "count": 1
+  }
+}
