@@ -347,4 +347,23 @@ public class EuropaGameTests implements FabricGameTest {
         ctx.assertFalse(PlayerRpgData.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, old).getOrThrow().hasClass(), "classe removida vira 'sem classe'");
         ctx.complete();
     }
+
+    @GameTest(templateName = EMPTY_STRUCTURE)
+    public void gearEvolution(TestContext ctx) {
+        ServerPlayerEntity p = player(ctx);
+        ItemStack sword = new ItemStack(ModItems.ADAMANTITE_SWORD);
+        ctx.assertTrue(com.europa.rpg.item.GearProgress.visualStage(sword) == 0, "fase inicial base");
+        com.europa.rpg.item.GearProgress.addXp(p, sword, 160);
+        ctx.assertTrue(com.europa.rpg.item.GearProgress.level(sword) == 3, "160 XP = nível 3, obtido " + com.europa.rpg.item.GearProgress.level(sword));
+        ctx.assertTrue(com.europa.rpg.item.RarityRoller.rarityOf(sword) == com.europa.rpg.item.Rarity.UNCOMMON, "nível 3 sobe raridade");
+        ctx.assertTrue(com.europa.rpg.item.GearProgress.visualStage(sword) == 1, "nível 3 = Desperto");
+        com.europa.rpg.item.GearProgress.addXp(p, sword, 5000);
+        ctx.assertTrue(com.europa.rpg.item.GearProgress.level(sword) == 5, "nível máximo 5");
+        ctx.assertTrue(com.europa.rpg.item.RarityRoller.rarityOf(sword) == com.europa.rpg.item.Rarity.RARE, "nível 5 sobe outra raridade");
+        ctx.assertTrue(com.europa.rpg.item.GearProgress.visualStage(sword) == 2, "nível 5 = Ascendido");
+        var nbt = sword.get(net.minecraft.component.DataComponentTypes.CUSTOM_DATA).copyNbt().getCompound("europa_gear");
+        ctx.assertTrue(nbt.getList("affixes", 8).size() == 4, "4 subidas de nível = 4 afixos");
+        com.europa.rpg.item.GearProgress.addXp(p, new ItemStack(net.minecraft.item.Items.BREAD), 100); // não-equipamento ignorado
+        ctx.complete();
+    }
 }

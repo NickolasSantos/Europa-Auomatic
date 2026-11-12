@@ -1,0 +1,4 @@
+version:3955
+resourcePacks:["vanilla","fabric","file/FreshAnimations_v1.10.2.zip"]
+key_iris.keybind.reload:key.keyboard.unknown
+key_iris.keybind.toggleShaders:key.keyboard.f6

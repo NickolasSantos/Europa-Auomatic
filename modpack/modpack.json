@@ -1,0 +1,170 @@
+{
+  "name": "Europa RPG",
+  "version": "0.4.0",
+  "author": "NickolasSantos",
+  "minecraft": "1.21.1",
+  "loader": "fabric-0.20.1",
+  "curseforge": [
+    {
+      "name": "AmbientSounds",
+      "projectID": 254284,
+      "fileID": 9254786,
+      "file": "AmbientSounds_FABRIC_v6.3.11_mc1.21.1.jar"
+    },
+    {
+      "name": "AppleSkin",
+      "projectID": 248787,
+      "fileID": 5864741,
+      "file": "appleskin-fabric-mc1.21-3.0.6.jar"
+    },
+    {
+      "name": "Complementary Shaders - Reimagined",
+      "projectID": 627557,
+      "fileID": 8884654,
+      "file": "ComplementaryReimagined_r5.9.3.zip"
+    },
+    {
+      "name": "Continuity",
+      "projectID": 531351,
+      "fileID": 5962881,
+      "file": "continuity-3.0.0+1.21.jar"
+    },
+    {
+      "name": "CreativeCore",
+      "projectID": 257814,
+      "fileID": 9542379,
+      "file": "CreativeCore_FABRIC_v2.13.54_mc1.21.1.jar"
+    },
+    {
+      "name": "EMI",
+      "projectID": 580555,
+      "fileID": 8081407,
+      "file": "emi-1.1.24+1.21.1+fabric.jar"
+    },
+    {
+      "name": "Entity Model Features",
+      "projectID": 844662,
+      "fileID": 9188523,
+      "file": "entity_model_features-3.3.12-1.21-fabric.jar"
+    },
+    {
+      "name": "Entity Texture Features",
+      "projectID": 568563,
+      "fileID": 9420330,
+      "file": "entity_texture_features-7.2.7-1.21-fabric.jar"
+    },
+    {
+      "name": "Fabric API",
+      "projectID": 306612,
+      "fileID": 9527610,
+      "file": "fabric-api-0.116.18-1.21.1.jar"
+    },
+    {
+      "name": "Fresh Animations",
+      "projectID": 453763,
+      "fileID": 7248008,
+      "file": "FreshAnimations_v1.10.2.zip"
+    },
+    {
+      "name": "Jade",
+      "projectID": 324717,
+      "fileID": 8591528,
+      "file": "Jade-1.21.1-Fabric-15.10.6.jar"
+    },
+    {
+      "name": "Lithium",
+      "projectID": 360438,
+      "fileID": 8330364,
+      "file": "lithium-fabric-0.15.4+mc1.21.1.jar"
+    },
+    {
+      "name": "Lithostitched",
+      "projectID": 936015,
+      "fileID": 9170707,
+      "file": "lithostitched-1.8.1-fabric-21.1.jar"
+    },
+    {
+      "name": "Mod Menu",
+      "projectID": 308702,
+      "fileID": 8966434,
+      "file": "modmenu-11.0.5.jar"
+    },
+    {
+      "name": "Sodium",
+      "projectID": 394468,
+      "fileID": 8756581,
+      "file": "sodium-fabric-0.8.13+mc1.21.1.jar"
+    },
+    {
+      "name": "Sound Physics Remastered",
+      "projectID": 535489,
+      "fileID": 9279981,
+      "file": "sound-physics-remastered-fabric-1.21.1-1.5.2.jar"
+    },
+    {
+      "name": "Terralith",
+      "projectID": 513688,
+      "fileID": 8222737,
+      "file": "Terralith_1.21.x_v2.6.2.jar"
+    },
+    {
+      "name": "Text Placeholder API",
+      "projectID": 1037459,
+      "fileID": 6131327,
+      "file": "placeholder-api-2.4.2+1.21.jar"
+    },
+    {
+      "name": "Visuality",
+      "projectID": 521126,
+      "fileID": 5537576,
+      "file": "visuality-0.7.7+1.21.jar"
+    }
+  ],
+  "bundled": [
+    {
+      "name": "Iris Shaders",
+      "modrinth": "iris",
+      "version": "1.8.14-beta.1+1.21.1-fabric",
+      "file": "iris-fabric-1.8.14-beta.1+mc1.21.1.jar",
+      "license": "LGPL-3.0-only"
+    },
+    {
+      "name": "Cloth Config API",
+      "modrinth": "cloth-config",
+      "version": "15.0.140+fabric",
+      "file": "cloth-config-15.0.140-fabric.jar",
+      "license": "LGPL-3.0-only"
+    },
+    {
+      "name": "YUNG's API",
+      "modrinth": "yungs-api",
+      "version": "1.21.1-Fabric-5.1.9",
+      "file": "YungsApi-1.21.1-Fabric-5.1.9.jar",
+      "license": "LGPL-3.0-only"
+    },
+    {
+      "name": "YUNG's Better Dungeons",
+      "modrinth": "yungs-better-dungeons",
+      "version": "1.21.1-Fabric-5.1.4",
+      "file": "YungsBetterDungeons-1.21.1-Fabric-5.1.4.jar",
+      "license": "LGPL-3.0-only"
+    },
+    {
+      "name": "YUNG's Better Mineshafts",
+      "modrinth": "yungs-better-mineshafts",
+      "version": "1.21.1-Fabric-5.1.1",
+      "file": "YungsBetterMineshafts-1.21.1-Fabric-5.1.1.jar",
+      "license": "LGPL-3.0-only"
+    },
+    {
+      "name": "Falling Leaves",
+      "modrinth": "fallingleaves",
+      "version": "1.17.1+1.21.1",
+      "file": "fallingleaves-1.17.1+1.21.1.jar",
+      "license": "MIT"
+    }
+  ],
+  "removed": {
+    "Entity Culling": "licença não permite redistribuir e a CurseForge não expõe a versão testada; Sodium já faz culling"
+  }
+}

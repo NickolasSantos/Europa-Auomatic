@@ -13,11 +13,26 @@ RPG medieval original: **32 classes em 5 categorias, 96 subclasses, 18 raças, 8
 
 Funciona em single-player e servidor (o mod precisa estar no cliente **e** no servidor).
 
+## Modpack (CurseForge)
+
+`build/Europa-RPG-<versão>.zip` é gerado por `python3 tools/build_modpack.py` (depois de `./gradlew build`) a partir de `modpack/modpack.json`. Importe na CurseForge em **Create Custom Profile → Import**.
+
+| Grupo | Mods |
+|---|---|
+| Desempenho e shaders | Sodium, Lithium, Iris + Complementary Reimagined (ligado; **F6** liga/desliga) |
+| Animações e modelos | Entity Model Features, Entity Texture Features, Fresh Animations |
+| Interface | EMI, Jade, AppleSkin, Mod Menu |
+| Mundo e ambiente | Terralith, YUNG's Better Dungeons/Mineshafts, Continuity, AmbientSounds, Sound Physics Remastered, Visuality, Falling Leaves |
+
+Fabric Loader **0.20.1** (o Lithostitched, exigido pelo Terralith, usa um formato que o 0.18 não lê). Mods com ID exato na CurseForge são referenciados; os de licença livre sem ID exato (Iris, Cloth Config, YUNG's, Falling Leaves) vão embutidos na versão testada. Entity Culling ficou de fora (licença não permite redistribuir). O pacote remapeia as teclas do Iris que colidiam com as do mod (R recarregava shaders, K desligava shaders).
+
+O conjunto foi testado num lançamento de produção (jar oficial do Minecraft + Fabric Loader + jars reais), com shaders ligados.
+
 ## Controles
 
 | Tecla | Ação |
 |---|---|
-| **K** | Tela de personagem (Ficha, Raça, Talentos, Bênção, Profissões, Facções) |
+| **K** | Tela de personagem (Ficha, Raça, Talentos, Bênção, Profissões, Facções); sem classe, abre o seletor de classes |
 | **R** | Habilidade da classe |
 | **G** | Poder supremo da subclasse (nível 10) |
 | **V** | Habilidade racial |
@@ -64,6 +79,10 @@ Engenheiro de Autômatos, Tecelão de Ecos, Cozinheiro de Metamorfoses, Restaura
 
 Raridades: Comum, Incomum, Raro, Épico, Lendário, Mítico, Divino. Cada tier acima de Comum adiciona um afixo — atributos (dano, vida, armadura, velocidade…) ou especiais (crítico, roubo de vida, poder de habilidade). A raridade é sorteada nos baús de todas as estruturas, na dungeon (com raridade mínima) e no chefe; a profissão Restaurador de Artefatos pode forjar obras-primas com raridade.
 
+### Evolução de equipamentos
+
+Armas ganham XP ao matar; armaduras, ao receber dano. Nível 1–5: cada nível adiciona um afixo, e os níveis 3 e 5 sobem um tier de raridade (até Mítico). Os equipamentos do mod mudam de textura em três fases — base, **Desperto** (runas douradas) e **Ascendido** (brilho e aura) — conforme o nível ou a raridade. Itens Épicos ou melhores brilham; o nome aparece na cor da raridade.
+
 ## Economia e facções
 
 - Moeda: **Fragmento de Aster** (9 = 1 Prisma de Aster).
@@ -85,12 +104,12 @@ Raridades: Comum, Incomum, Raro, Épico, Lendário, Mítico, Divino. Cada tier a
 ```bash
 ./gradlew build          # jar em build/libs/
 ./gradlew runClient      # cliente de desenvolvimento
-./gradlew runGametest    # 10 testes automatizados em servidor headless
+./gradlew runGametest    # 11 testes automatizados em servidor headless
 ```
 
 Os GameTests cobrem: classes/subclasses e restrições, as habilidades de todas as 96 subclasses e das 18 raças, talentos, bênçãos, profissões, recursos, raridade, mercado com preço dinâmico e troco, facções e loja por rank, missões, altar do chefe e migração de saves antigos.
 
-Texturas, modelos, receitas, loot e worldgen são gerados por `tools/gen_assets.py`; traduções pt_br/en_us por `tools/gen_lang.py` + `tools/lang_content.py`.
+Texturas são pixel art procedural original (`tools/art.py`, sombreamento e contorno automáticos), retratos das classes por `tools/portraits.py`; modelos, receitas, loot e worldgen por `tools/gen_assets.py`; traduções pt_br/en_us por `tools/gen_lang.py` + `tools/lang_content.py`.
 
 ## Arquitetura
 
