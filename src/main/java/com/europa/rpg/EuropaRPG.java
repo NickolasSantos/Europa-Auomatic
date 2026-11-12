@@ -4,7 +4,10 @@ import com.europa.rpg.command.RpgCommand;
 import com.europa.rpg.entity.CatacombLordEntity;
 import com.europa.rpg.network.ModNetworking;
 import com.europa.rpg.quest.QuestManager;
+import com.europa.rpg.entity.ServantEntity;
+import com.europa.rpg.profession.Professions;
 import com.europa.rpg.registry.ModArmorMaterials;
+import com.europa.rpg.rpg.CombatHooks;
 import com.europa.rpg.registry.ModBlocks;
 import com.europa.rpg.registry.ModEntities;
 import com.europa.rpg.registry.ModItemGroups;
@@ -50,6 +53,8 @@ public class EuropaRPG implements ModInitializer {
         ModStructures.init();
         ModWorldGen.init();
         ModNetworking.init();
+        CombatHooks.init();
+        Professions.init();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, env) -> RpgCommand.register(dispatcher));
 
@@ -64,16 +69,22 @@ public class EuropaRPG implements ModInitializer {
             ServerPlayerEntity p = handler.getPlayer();
             Progression.applyAttributes(p);
             Progression.sync(p);
+            Progression.fullSync(p, true);
             if (!RpgAttachments.get(p).hasClass()) Messages.sendClassChoice(p);
+        });
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            Progression.forget(handler.getPlayer());
+            Professions.forget(handler.getPlayer());
         });
         ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
             Progression.applyAttributes(newPlayer);
             newPlayer.setHealth(newPlayer.getMaxHealth());
             Progression.sync(newPlayer);
+            Progression.fullSync(newPlayer, true);
         });
 
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
-            if (entity instanceof ServerPlayerEntity) return;
+            if (entity instanceof ServerPlayerEntity || entity instanceof ServantEntity) return;
             if (entity instanceof CatacombLordEntity) {
                 // Recompensa compartilhada: todos os jogadores próximos recebem XP e progresso.
                 for (ServerPlayerEntity p : entity.getWorld().getEntitiesByClass(ServerPlayerEntity.class,
@@ -95,6 +106,7 @@ public class EuropaRPG implements ModInitializer {
     private static ServerPlayerEntity resolveKiller(Entity attacker) {
         if (attacker instanceof ServerPlayerEntity p) return p;
         if (attacker instanceof TameableEntity t && t.getOwner() instanceof ServerPlayerEntity p) return p;
+        if (attacker instanceof ServantEntity s && s.getOwner() instanceof ServerPlayerEntity p) return p;
         return null;
     }
 

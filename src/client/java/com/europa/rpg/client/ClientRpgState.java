@@ -1,11 +1,16 @@
 package com.europa.rpg.client;
 
 import com.europa.rpg.network.RpgSyncPayload;
+import com.europa.rpg.rpg.PlayerRpgData;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtOps;
 
-/** Cópia no cliente do estado RPG, alimentada por {@link RpgSyncPayload}. */
+/** Cópia no cliente do estado RPG: leve (HUD, frequente) e completa (tela de personagem, quando muda). */
 public final class ClientRpgState {
     public static RpgSyncPayload data;
-    /** Cooldowns interpolados localmente entre sincronizações. */
+    public static PlayerRpgData full = new PlayerRpgData();
+    /** Incrementado a cada sincronização completa; a tela usa para se reconstruir. */
+    public static int version;
     public static int primaryCd, ultimateCd;
 
     private ClientRpgState() {}
@@ -14,6 +19,14 @@ public final class ClientRpgState {
         data = p;
         primaryCd = p.primaryCd();
         ultimateCd = p.ultimateCd();
+        full.mana = p.mana();
+    }
+
+    public static void updateFull(NbtCompound nbt) {
+        PlayerRpgData.CODEC.parse(NbtOps.INSTANCE, nbt).result().ifPresent(d -> {
+            full = d;
+            version++;
+        });
     }
 
     public static void tick() {
@@ -23,5 +36,7 @@ public final class ClientRpgState {
 
     public static void reset() {
         data = null;
+        full = new PlayerRpgData();
+        version++;
     }
 }

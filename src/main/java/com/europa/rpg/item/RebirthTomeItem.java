@@ -36,6 +36,7 @@ public class RebirthTomeItem extends Item {
             d.rpgClass = RpgClass.NONE;
             d.subclass = RpgSubclass.NONE;
             d.cooldowns.clear();
+            d.talents.clear();
             Progression.applyAttributes(p);
             Progression.sync(p);
             stack.decrementUnlessCreative(1, p);

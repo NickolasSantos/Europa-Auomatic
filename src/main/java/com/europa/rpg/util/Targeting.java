@@ -78,6 +78,7 @@ public final class Targeting {
         return p.getWorld().getEntitiesByClass(LivingEntity.class, box, e -> e != p && e.isAlive()
                 && !(e instanceof net.minecraft.entity.player.PlayerEntity)
                 && !(e instanceof net.minecraft.entity.passive.TameableEntity t && t.getOwner() == p)
+                && !(e instanceof com.europa.rpg.entity.ServantEntity s && s.isOwnedBy(p))
                 && e.squaredDistanceTo(center) <= radius * radius);
     }
 }

@@ -178,6 +178,221 @@ L = {
                                         "Find a Catacomb (/locate structure europa:catacomb), use the key on the altar and defeat the boss."),
 }
 
+
+# Remove chaves antigas de habilidade (agora indexadas pelo id da habilidade).
+L = {k: v for k, v in L.items() if not k.startswith("rpg.europa.ability.") and not k.startswith("rpg.europa.ultimate.")}
+
+L.update({
+    "key.europa.character": ("Ficha do personagem", "Character sheet"),
+    "block.europa.shrine": ("Santuário dos Patronos", "Patron Shrine"),
+    "entity.europa.servant": ("Servo Morto-Vivo", "Undead Servant"),
+    "rpg.europa.controls": ("[K] ficha/talentos/bênçãos · [R] habilidade · [G] supremo · /europa quest", "[K] sheet/talents/blessings · [R] ability · [G] ultimate · /europa quest"),
+    "rpg.europa.open_screen_hint": ("Dica: pressione [K] para abrir a ficha do personagem.", "Tip: press [K] to open the character sheet."),
+    "rpg.europa.stats.talents": ("Pontos de talento disponíveis: %s", "Talent points available: %s"),
+    "rpg.europa.talent_point": ("+1 ponto de talento (%s disponíveis) — tecla K", "+1 talent point (%s available) — key K"),
+    "rpg.europa.hud.points": ("%s pts de talento [K]", "%s talent pts [K]"),
+    "rpg.europa.overload": ("Sobrecarga! Sem recarga.", "Overload! No cooldown."),
+    "rpg.europa.last_stand": ("Última Resistência!", "Last Stand!"),
+    "rpg.europa.servant_limit": ("Você já controla servos demais.", "You already control too many servants."),
+    # Tela
+    "rpg.europa.screen.title": ("Personagem", "Character"),
+    "rpg.europa.screen.tab.sheet": ("Ficha", "Sheet"),
+    "rpg.europa.screen.tab.talents": ("Talentos", "Talents"),
+    "rpg.europa.screen.tab.blessing": ("Bênção", "Blessing"),
+    "rpg.europa.screen.tab.professions": ("Profissões", "Professions"),
+    "rpg.europa.screen.subclasses": ("Subclasses (nível 10):", "Subclasses (level 10):"),
+    "rpg.europa.screen.hover_hint": ("Passe o mouse sobre uma classe para ver detalhes.", "Hover a class to see details."),
+    "rpg.europa.screen.attributes": ("Vida %s · Armadura %s · Dano %s · Poder %s", "Health %s · Armor %s · Damage %s · Power %s"),
+    # Classes novas
+    "rpg.europa.class.cleric": ("Clérigo", "Cleric"),
+    "rpg.europa.class.cleric.desc": ("Curandeiro sagrado: sustenta o grupo e pune mortos-vivos.", "Holy healer: sustains the party and punishes the undead."),
+    "rpg.europa.class.necromancer": ("Necromante", "Necromancer"),
+    "rpg.europa.class.necromancer.desc": ("Ergue servos mortos-vivos e drena a vida dos inimigos.", "Raises undead servants and drains enemies' life."),
+    "rpg.europa.class.druid": ("Druida", "Druid"),
+    "rpg.europa.class.druid.desc": ("Controla o campo com raízes e espinhos da natureza.", "Controls the field with nature's roots and thorns."),
+    "rpg.europa.class.monk": ("Monge", "Monk"),
+    "rpg.europa.class.monk.desc": ("Artista marcial: golpes rápidos, mais fortes de mãos vazias.", "Martial artist: swift blows, stronger when unarmed."),
+    "rpg.europa.class.bard": ("Bardo", "Bard"),
+    "rpg.europa.class.bard.desc": ("Suporte: canções que fortalecem aliados e confundem inimigos.", "Support: songs that empower allies and confuse foes."),
+    "rpg.europa.class.alchemist": ("Alquimista", "Alchemist"),
+    "rpg.europa.class.alchemist.desc": ("Arremessa frascos voláteis e prepara elixires poderosos.", "Throws volatile flasks and brews powerful elixirs."),
+    "rpg.europa.class.runesmith": ("Runeiro", "Runesmith"),
+    "rpg.europa.class.runesmith.desc": ("Inscreve runas: armadilhas, armaduras e torres arcanas.", "Inscribes runes: traps, armor and arcane turrets."),
+    "rpg.europa.class.voidweaver": ("Tecelão do Vazio", "Voidweaver"),
+    "rpg.europa.class.voidweaver.desc": ("Dobra o espaço: teletransporte e gravidade colapsante.", "Bends space: teleportation and collapsing gravity."),
+    # Subclasses novas
+    "rpg.europa.subclass.hierophant": ("Hierofante", "Hierophant"),
+    "rpg.europa.subclass.hierophant.desc": ("Consagra o chão: cura contínua para o grupo.", "Consecrates the ground: continuous party healing."),
+    "rpg.europa.subclass.inquisitor": ("Inquisidor", "Inquisitor"),
+    "rpg.europa.subclass.inquisitor.desc": ("Juiz implacável: raios sagrados contra um alvo.", "Relentless judge: holy lightning on a single target."),
+    "rpg.europa.subclass.legion_lord": ("Senhor das Legiões", "Legion Lord"),
+    "rpg.europa.subclass.legion_lord.desc": ("Comanda um exército de mortos.", "Commands an army of the dead."),
+    "rpg.europa.subclass.hemomancer": ("Hemomante", "Hemomancer"),
+    "rpg.europa.subclass.hemomancer.desc": ("Magia de sangue: rouba vida em área.", "Blood magic: area life drain."),
+    "rpg.europa.subclass.shapeshifter": ("Metamorfo", "Shapeshifter"),
+    "rpg.europa.subclass.shapeshifter.desc": ("Assume a forma de uma fera colossal.", "Takes the form of a colossal beast."),
+    "rpg.europa.subclass.grove_warden": ("Guardião do Bosque", "Grove Warden"),
+    "rpg.europa.subclass.grove_warden.desc": ("Raízes ancestrais prendem inimigos e curam aliados.", "Ancestral roots bind foes and heal allies."),
+    "rpg.europa.subclass.iron_fist": ("Punho de Ferro", "Iron Fist"),
+    "rpg.europa.subclass.iron_fist.desc": ("Rajadas de golpes que ignoram a defesa do alvo.", "Strike flurries that ignore the target's guard."),
+    "rpg.europa.subclass.windwalker": ("Andarilho do Vento", "Windwalker"),
+    "rpg.europa.subclass.windwalker.desc": ("Mobilidade extrema e quedas suaves.", "Extreme mobility and gentle falls."),
+    "rpg.europa.subclass.minstrel": ("Menestrel", "Minstrel"),
+    "rpg.europa.subclass.minstrel.desc": ("Baladas que regeneram e protegem o grupo.", "Ballads that regenerate and shield the party."),
+    "rpg.europa.subclass.discordant": ("Dissonante", "Discordant"),
+    "rpg.europa.subclass.discordant.desc": ("Notas caóticas que voltam inimigos uns contra os outros.", "Chaotic notes that turn enemies on each other."),
+    "rpg.europa.subclass.plaguebringer": ("Pestilento", "Plaguebringer"),
+    "rpg.europa.subclass.plaguebringer.desc": ("Nuvens tóxicas persistentes.", "Lingering toxic clouds."),
+    "rpg.europa.subclass.transmuter": ("Transmutador", "Transmuter"),
+    "rpg.europa.subclass.transmuter.desc": ("Elixires que transformam o próprio corpo.", "Elixirs that transform the body itself."),
+    "rpg.europa.subclass.runeforger": ("Forjador de Runas", "Runeforger"),
+    "rpg.europa.subclass.runeforger.desc": ("Runas de proteção gravadas na armadura.", "Protective runes etched into armor."),
+    "rpg.europa.subclass.arcane_architect": ("Arquiteto Arcano", "Arcane Architect"),
+    "rpg.europa.subclass.arcane_architect.desc": ("Constrói torres rúnicas que atiram sozinhas.", "Builds rune turrets that fire on their own."),
+    "rpg.europa.subclass.astral_wanderer": ("Andarilho Astral", "Astral Wanderer"),
+    "rpg.europa.subclass.astral_wanderer.desc": ("Invoca o colapso de uma estrela.", "Calls down a collapsing star."),
+    "rpg.europa.subclass.void_devourer": ("Devorador do Vazio", "Void Devourer"),
+    "rpg.europa.subclass.void_devourer.desc": ("Uma fenda que consome inimigos e devolve mana.", "A rift that consumes foes and returns mana."),
+})
+
+ABILITIES = {
+    "charge": ("Investida", "Charge", "Avança e golpeia todos à sua frente.", "Dash forward and strike everything ahead."),
+    "blood_rage": ("Fúria Sangrenta", "Blood Rage", "Força II, Velocidade II, Pressa II e Regeneração por 10 s.", "Strength II, Speed II, Haste II and Regeneration for 10 s."),
+    "divine_shield": ("Escudo Divino", "Divine Shield", "Cura e protege aliados próximos; queima mortos-vivos.", "Heals and shields nearby allies; burns the undead."),
+    "arcane_missile": ("Míssil Arcano", "Arcane Missile", "Raio mágico instantâneo no alvo mirado.", "Instant magic bolt at your target."),
+    "meteor": ("Meteoro", "Meteor", "Um meteoro cai no ponto mirado após 1 s (não destrói blocos).", "A meteor strikes the targeted spot after 1 s (no block damage)."),
+    "blizzard": ("Nevasca", "Blizzard", "Congela e enfraquece todos num raio de 8 blocos.", "Freezes and weakens everything within 8 blocks."),
+    "shadow_step": ("Passo Sombrio", "Shadow Step", "Teleporta para as costas do alvo e fica invisível.", "Teleport behind the target and turn invisible."),
+    "death_mark": ("Marca da Morte", "Death Mark", "Golpe mágico massivo + Definhamento no alvo.", "Massive magic strike + Wither on the target."),
+    "smoke_bomb": ("Bomba de Fumaça", "Smoke Bomb", "Cega inimigos próximos; você fica invisível e veloz.", "Blinds nearby enemies; you turn invisible and fast."),
+    "volley": ("Saraivada", "Volley", "Dispara um leque de 5 flechas.", "Fire a fan of 5 arrows."),
+    "piercing_shot": ("Tiro Perfurante", "Piercing Shot", "Atravessa todos os inimigos em linha (64 blocos).", "Pierces every enemy in a line (64 blocks)."),
+    "call_of_the_pack": ("Chamado da Matilha", "Call of the Pack", "Invoca 3 lobos espirituais por 60 s.", "Summons 3 spirit wolves for 60 s."),
+    "restoring_light": ("Luz Restauradora", "Restoring Light", "Cura você e aliados próximos e remove veneno, definhamento e fraqueza.", "Heals you and nearby allies and removes poison, wither and weakness."),
+    "sanctuary": ("Santuário", "Sanctuary", "Consagra a área por 10 s: cura aliados e fere mortos-vivos a cada segundo.", "Consecrates the area for 10 s: heals allies and burns undead every second."),
+    "judgment": ("Julgamento", "Judgment", "Raio sagrado no alvo; dano dobrado contra mortos-vivos.", "Holy lightning on the target; double damage to undead."),
+    "raise_servant": ("Erguer Servo", "Raise Servant", "Ergue um servo morto-vivo por 45 s (máx. 2).", "Raises an undead servant for 45 s (max 2)."),
+    "unholy_legion": ("Legião Profana", "Unholy Legion", "Ergue 4 servos fortalecidos por 30 s.", "Raises 4 empowered servants for 30 s."),
+    "blood_pact": ("Pacto de Sangue", "Blood Pact", "Fere todos num raio de 6 blocos e cura metade do dano causado.", "Damages all within 6 blocks and heals half the damage dealt."),
+    "thorn_snare": ("Laço de Espinhos", "Thorn Snare", "Prende o alvo no lugar e o envenena.", "Roots the target in place and poisons it."),
+    "beast_form": ("Forma da Fera", "Beast Form", "Por 20 s: +8 de vida, Força II, Resistência e Velocidade.", "For 20 s: +8 health, Strength II, Resistance and Speed."),
+    "ancestral_roots": ("Raízes Ancestrais", "Ancestral Roots", "Prende e fere inimigos em 8 blocos; regenera aliados.", "Roots and damages foes within 8 blocks; regenerates allies."),
+    "seismic_palm": ("Palma Sísmica", "Seismic Palm", "Golpe que arremessa o alvo; +50% de dano de mãos vazias.", "A strike that hurls the target; +50% damage when unarmed."),
+    "hundred_strikes": ("Cem Golpes", "Hundred Strikes", "Seis golpes rápidos que ignoram a invulnerabilidade do alvo.", "Six rapid strikes that ignore the target's invulnerability."),
+    "wind_step": ("Passo do Vento", "Wind Step", "Salto longo + Velocidade III, Queda Lenta e Salto por 8 s.", "Long leap + Speed III, Slow Falling and Jump Boost for 8 s."),
+    "song_of_valor": ("Canção do Valor", "Song of Valor", "Aliados em 10 blocos recebem Força e Velocidade.", "Allies within 10 blocks gain Strength and Speed."),
+    "restoring_ballad": ("Balada Restauradora", "Restoring Ballad", "Regeneração II e Absorção II para o grupo.", "Regeneration II and Absorption II for the party."),
+    "dissonant_chord": ("Acorde Dissonante", "Dissonant Chord", "Inimigos ficam fracos, lentos, nauseados e atacam uns aos outros.", "Enemies become weak, slow, nauseous and attack each other."),
+    "volatile_flask": ("Frasco Volátil", "Volatile Flask", "Arremessa um frasco de veneno, lentidão e fraqueza.", "Throws a flask of poison, slowness and weakness."),
+    "toxic_cloud": ("Nuvem Tóxica", "Toxic Cloud", "Nuvem de veneno III e definhamento por 10 s no ponto mirado.", "Poison III and wither cloud for 10 s at the target spot."),
+    "perfect_elixir": ("Elixir Perfeito", "Perfect Elixir", "Absorção III, Regeneração II, Força, Velocidade e resistência ao fogo.", "Absorption III, Regeneration II, Strength, Speed and fire resistance."),
+    "explosive_rune": ("Runa Explosiva", "Explosive Rune", "Grava uma runa no chão que explode quando um inimigo pisa (20 s).", "Etches a rune that explodes when an enemy steps on it (20 s)."),
+    "runic_armor": ("Armadura Rúnica", "Runic Armor", "Resistência II e Absorção III por 15 s.", "Resistance II and Absorption III for 15 s."),
+    "rune_turret": ("Torre Rúnica", "Rune Turret", "Uma torre arcana atira no inimigo mais próximo por 15 s.", "An arcane turret fires at the nearest enemy for 15 s."),
+    "void_rift": ("Rasgo do Vazio", "Void Rift", "Teleporta até 10 blocos na direção do olhar.", "Teleports up to 10 blocks where you look."),
+    "stellar_collapse": ("Colapso Estelar", "Stellar Collapse", "Puxa inimigos para um ponto e detona após 1 s.", "Pulls enemies into a point and detonates after 1 s."),
+    "devouring_rift": ("Fenda Devoradora", "Devouring Rift", "Por 3 s fere inimigos ao redor; cada acerto devolve 3 de mana.", "For 3 s damages nearby foes; each hit restores 3 mana."),
+}
+for k, (pt, en, dpt, den) in ABILITIES.items():
+    L["rpg.europa.ability." + k] = (pt, en)
+    L["rpg.europa.ability." + k + ".desc"] = (dpt, den)
+
+TALENTS = {
+    "brute_force": ("Força Bruta", "Brute Force", "+%s de dano corpo a corpo por rank.", "+%s melee damage per rank."),
+    "keen_edge": ("Fio Afiado", "Keen Edge", "+%s de chance de acerto crítico (150%%) por rank.", "+%s critical hit chance (150%%) per rank."),
+    "focused_power": ("Poder Focado", "Focused Power", "+%s de poder das habilidades por rank.", "+%s ability power per rank."),
+    "bloodthirst": ("Sede de Sangue", "Bloodthirst", "Converte %s do dano causado em vida por rank.", "Converts %s of damage dealt into health per rank."),
+    "executioner": ("Executor", "Executioner", "+%s de dano contra alvos abaixo de 30%% de vida.", "+%s damage against targets below 30%% health."),
+    "vigor": ("Vigor", "Vigor", "+%s de vida máxima por rank.", "+%s max health per rank."),
+    "iron_skin": ("Pele de Ferro", "Iron Skin", "+%s de armadura por rank.", "+%s armor per rank."),
+    "steadfast": ("Inabalável", "Steadfast", "+%s de robustez e 5%% de resistência a repulsão por rank.", "+%s toughness and 5%% knockback resistance per rank."),
+    "second_wind": ("Segundo Fôlego", "Second Wind", "Regenera %s de vida a cada 5 s por rank.", "Regenerates %s health every 5 s per rank."),
+    "last_stand": ("Última Resistência", "Last Stand", "Sobrevive a um golpe fatal com 2 corações (recarga 120 s). %s", "Survive a lethal blow with 2 hearts (120 s cooldown). %s"),
+    "deep_mind": ("Mente Profunda", "Deep Mind", "+%s de mana máxima por rank.", "+%s max mana per rank."),
+    "flow": ("Fluxo", "Flow", "+%s de mana por segundo por rank.", "+%s mana per second per rank."),
+    "celerity": ("Celeridade", "Celerity", "-%s de recarga das habilidades por rank.", "-%s ability cooldown per rank."),
+    "efficiency": ("Eficiência", "Efficiency", "-%s de custo de mana por rank.", "-%s mana cost per rank."),
+    "overload": ("Sobrecarga", "Overload", "%s de chance de uma habilidade não entrar em recarga.", "%s chance for an ability to skip its cooldown."),
+}
+for k, (pt, en, dpt, den) in TALENTS.items():
+    L["rpg.europa.talent." + k] = (pt, en)
+    L["rpg.europa.talent." + k + ".desc"] = (dpt, den)
+L.update({
+    "rpg.europa.talent.branch.combat": ("Combate", "Combat"),
+    "rpg.europa.talent.branch.defense": ("Defesa", "Defense"),
+    "rpg.europa.talent.branch.arcane": ("Arcano", "Arcane"),
+    "rpg.europa.talent.rank": ("Rank %s/%s — total atual: %s", "Rank %s/%s — current total: %s"),
+    "rpg.europa.talent.status.ok": ("Disponível.", "Available."),
+    "rpg.europa.talent.status.maxed": ("Rank máximo.", "Max rank."),
+    "rpg.europa.talent.status.no_points": ("Sem pontos de talento.", "No talent points."),
+    "rpg.europa.talent.status.needs_previous": ("Requer o talento anterior do ramo.", "Requires the previous talent in this branch."),
+    "rpg.europa.talent.status.needs_branch_points": ("Requer %s pontos neste ramo.", "Requires %s points in this branch."),
+    "rpg.europa.talent.status.no_class": ("Escolha uma classe primeiro.", "Choose a class first."),
+})
+
+PATRONS = {
+    "solenne": ("Solenne", "a Aurora Eterna", "the Everlasting Dawn",
+                ("Regeneração sob a luz do sol.", "Regeneration under sunlight."),
+                ("+4 de vida máxima.", "+4 max health."),
+                ("+30% de dano contra mortos-vivos.", "+30% damage against the undead.")),
+    "morvath": ("Morvath", "o Abismo Silencioso", "the Silent Abyss",
+                ("Visão noturna permanente.", "Permanent night vision."),
+                ("Força à noite.", "Strength at night."),
+                ("+20% de dano à noite.", "+20% damage at night.")),
+    "thalor": ("Thalor", "o Forjador de Montanhas", "the Mountain Forger",
+               ("Pressa permanente.", "Permanent Haste."),
+               ("+2 de armadura e +1 de robustez.", "+2 armor and +1 toughness."),
+               ("Resistência ao fogo e +20% de velocidade de mineração.", "Fire resistance and +20% mining speed.")),
+    "ysmera": ("Ysmera", "a Senhora das Marés", "the Lady of Tides",
+               ("Respiração aquática.", "Water breathing."),
+               ("Graça do golfinho e poder do conduíte na água.", "Dolphin's grace and conduit power in water."),
+               ("+25% de dano na água ou na chuva.", "+25% damage in water or rain.")),
+    "kaelith": ("Kaelith", "a Tempestade Errante", "the Wandering Storm",
+                ("Velocidade permanente.", "Permanent Speed."),
+                ("Imunidade a dano de queda.", "Immunity to fall damage."),
+                ("15% de chance de invocar um raio em golpes corpo a corpo.", "15% chance to call lightning on melee hits.")),
+    "verdanya": ("Verdanya", "a Mãe das Raízes", "the Mother of Roots",
+                 ("+2 de sorte (melhores saques e pesca).", "+2 luck (better loot and fishing)."),
+                 ("Recupera fome a cada 30 s.", "Restores hunger every 30 s."),
+                 ("Imunidade a veneno e definhamento.", "Immunity to poison and wither.")),
+}
+for k, (name, tpt, ten, t1, t2, t3) in PATRONS.items():
+    L["rpg.europa.patron." + k] = (name, name)
+    L["rpg.europa.patron." + k + ".title"] = (tpt, ten)
+    L["rpg.europa.patron." + k + ".tier1"] = t1
+    L["rpg.europa.patron." + k + ".tier2"] = t2
+    L["rpg.europa.patron." + k + ".tier3"] = t3
+L.update({
+    "rpg.europa.patron.need_shrine": ("Jure lealdade perto de um Santuário dos Patronos.", "Pledge near a Patron Shrine."),
+    "rpg.europa.patron.pledged": ("Você jurou lealdade a %s.", "You pledged yourself to %s."),
+    "rpg.europa.patron.rejected": ("Seu patrono não aceita esta oferenda.", "Your patron does not accept this offering."),
+    "rpg.europa.patron.max_favor": ("Seu favor já é máximo.", "Your favor is already at maximum."),
+    "rpg.europa.patron.favor": ("Favor: %s/%s", "Favor: %s/%s"),
+    "rpg.europa.patron.tier_up": ("✦ %s concede a você a bênção de tier %s!", "✦ %s grants you the tier %s blessing!"),
+    "rpg.europa.patron.tier": ("Tier %s: ", "Tier %s: "),
+    "rpg.europa.patron.offerings": ("Oferendas aceitas (favor):", "Accepted offerings (favor):"),
+    "rpg.europa.patron.pick_hint": ("Clique num patrono perto de um Santuário para jurar (trocar zera o favor).", "Click a patron near a Shrine to pledge (switching resets favor)."),
+    "rpg.europa.patron.none": ("Você não serve a nenhum patrono.", "You serve no patron."),
+    "rpg.europa.patron.offer_hint": ("Oferenda: clique no Santuário com o item (agachado = pilha).", "Offer: use the item on the Shrine (sneak = whole stack)."),
+})
+
+PROFESSIONS = {
+    "mining": ("Mineração", "Mining", "%s de chance de minério duplo; mineração mais rápida.", "%s chance of double ore; faster mining."),
+    "woodcutting": ("Lenhador", "Woodcutting", "%s de chance de madeira dupla.", "%s chance of double logs."),
+    "farming": ("Agricultura", "Farming", "%s de chance de colheita dupla.", "%s chance of double harvest."),
+    "fishing": ("Pesca", "Fishing", "Sorte aumentada na pesca (%s).", "Increased fishing luck (%s)."),
+    "smithing": ("Ferraria", "Smithing", "%s de chance de forjar obra-prima (Inquebrável).", "%s chance to forge a masterwork (Unbreaking)."),
+    "alchemy": ("Alquimia", "Alchemy", "%s de chance de poção extra.", "%s chance of an extra potion."),
+}
+for k, (pt, en, ppt, pen) in PROFESSIONS.items():
+    L["rpg.europa.profession." + k] = (pt, en)
+    L["rpg.europa.profession." + k + ".perk"] = (ppt, pen)
+L.update({
+    "rpg.europa.profession.level_up": ("%s subiu para o nível %s!", "%s reached level %s!"),
+    "rpg.europa.profession.masterwork": ("Obra-prima! O item recebeu Inquebrável.", "Masterwork! The item gained Unbreaking."),
+    "rpg.europa.profession.extra_potion": ("Destilação perfeita: poção extra!", "Perfect distillation: extra potion!"),
+})
+
 base = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "main", "resources", "assets", "europa", "lang")
 os.makedirs(base, exist_ok=True)
 for idx, lang in enumerate(["pt_br", "en_us"]):

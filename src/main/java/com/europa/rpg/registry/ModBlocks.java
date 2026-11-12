@@ -3,6 +3,7 @@ package com.europa.rpg.registry;
 import com.europa.rpg.EuropaRPG;
 import com.europa.rpg.block.BossAltarBlock;
 import com.europa.rpg.block.QuestBoardBlock;
+import com.europa.rpg.block.ShrineBlock;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -29,6 +30,9 @@ public final class ModBlocks {
     public static final Block QUEST_BOARD = register("quest_board", new QuestBoardBlock(AbstractBlock.Settings.copy(Blocks.OAK_PLANKS).strength(2f).nonOpaque()));
     public static final Block BOSS_ALTAR = register("boss_altar", new BossAltarBlock(AbstractBlock.Settings.copy(Blocks.REINFORCED_DEEPSLATE)
             .strength(-1f, 3600000f).dropsNothing().luminance(s -> 10)));
+
+    public static final Block SHRINE = register("shrine", new ShrineBlock(AbstractBlock.Settings.copy(Blocks.CHISELED_STONE_BRICKS)
+            .strength(3f, 6f).luminance(s -> 12)));
 
     private ModBlocks() {}
 

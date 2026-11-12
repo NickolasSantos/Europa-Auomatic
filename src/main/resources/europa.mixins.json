@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.europa.rpg.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "BrewingStandBlockEntityMixin",
+    "ItemStackMixin",
+    "LivingEntityMixin",
+    "PotionSlotMixin"
+  ],
+  "injectors": { "defaultRequire": 1 }
+}

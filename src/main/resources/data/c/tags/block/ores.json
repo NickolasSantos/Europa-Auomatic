@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "europa:mithril_ore",
+    "europa:deepslate_mithril_ore",
+    "europa:adamantite_ore",
+    "europa:soulstone_ore"
+  ]
+}

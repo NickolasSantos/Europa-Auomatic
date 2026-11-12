@@ -458,6 +458,59 @@ def boss_texture():
     return img
 
 
+def shrine_top():
+    img = noise_tex(hexc("#9a9a9a"), 0.07, 41)
+    gold, gem = hexc("#e8c547"), hexc("#b366ff")
+    for i in range(2, 14):
+        img.putpixel((i, 2), gold); img.putpixel((i, 13), gold)
+        img.putpixel((2, i), gold); img.putpixel((13, i), gold)
+    for (x, y) in [(7, 7), (8, 7), (7, 8), (8, 8)]:
+        img.putpixel((x, y), gem)
+    for (x, y) in [(6, 7), (9, 8), (7, 6), (8, 9)]:
+        img.putpixel((x, y), hexc("#e0b3ff"))
+    return img
+
+
+def shrine_side():
+    img = noise_tex(hexc("#8a8a8a"), 0.08, 42)
+    gold = hexc("#e8c547")
+    for x in range(16):
+        img.putpixel((x, 0), hexc("#b0b0b0")); img.putpixel((x, 15), hexc("#5a5a5a"))
+        img.putpixel((x, 3), gold)
+    # chama de vela estilizada
+    for (x, y) in [(7, 6), (8, 6), (7, 7), (8, 7), (7, 8), (8, 8), (7, 9), (8, 9), (7, 10), (8, 10)]:
+        img.putpixel((x, y), hexc("#efe2c0"))
+    for (x, y) in [(7, 4), (8, 5), (7, 5)]:
+        img.putpixel((x, y), hexc("#ffb000"))
+    return img
+
+
+def servant_texture():
+    """64x64 no layout do modelo de zumbi/jogador: tons de osso pálido azulado com olhos de alma."""
+    rnd = random.Random(77)
+    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    base, dark, cloth = hexc("#7d8a99"), hexc("#3a4250"), hexc("#2c2440")
+
+    def fill(x0, y0, w, h, c, var=0.1):
+        for y in range(y0, y0 + h):
+            for x in range(x0, x0 + w):
+                img.putpixel((x, y), shade(c, 1 + rnd.uniform(-var, var)))
+
+    fill(0, 0, 32, 16, base)          # cabeça
+    fill(16, 16, 24, 16, cloth)       # tronco (manto)
+    fill(40, 16, 16, 16, base)        # braço direito
+    fill(0, 16, 16, 16, cloth)        # perna direita
+    fill(16, 48, 16, 16, cloth)       # perna esquerda
+    fill(32, 48, 16, 16, base)        # braço esquerdo
+    for (x, y) in [(9, 12), (10, 12), (13, 12), (14, 12)]:
+        img.putpixel((x, y), hexc("#7ff7ff"))
+    for x in range(10, 14):
+        img.putpixel((x, 14), dark)
+    for y in range(20, 32):
+        img.putpixel((23, y), hexc("#8a6bbf")); img.putpixel((24, y), hexc("#8a6bbf"))
+    return img
+
+
 def save(img, *path):
     p = os.path.join(ASSETS, "textures", *path)
     os.makedirs(os.path.dirname(p), exist_ok=True)
@@ -510,6 +563,10 @@ def gen_textures():
     save(armor_layer("#c0283e", "#8e1a2c", 33), "models", "armor", "adamantite_layer_1.png")
     save(armor_layer("#a82236", "#701526", 34), "models", "armor", "adamantite_layer_2.png")
     save(boss_texture(), "entity", "catacomb_lord.png")
+    save(servant_texture(), "entity", "servant.png")
+    save(shrine_top(), "block", "shrine_top.png")
+    save(shrine_side(), "block", "shrine_side.png")
+    save(noise_tex(hexc("#6a6a6a"), 0.07, 43), "block", "shrine_bottom.png")
 
     icon = from_template(SWORD, pal(legend["soulreaper"][1])).resize((128, 128), Image.NEAREST)
     bg = Image.new("RGBA", (128, 128), hexc("#1c1824"))
@@ -551,6 +608,10 @@ def gen_models():
         "top": f"{MOD}:block/boss_altar_top", "side": f"{MOD}:block/boss_altar_side", "bottom": f"{MOD}:block/boss_altar_bottom"}})
     write_json(os.path.join(bs, "boss_altar.json"), {"variants": {"": {"model": f"{MOD}:block/boss_altar"}}})
     write_json(os.path.join(im, "boss_altar.json"), {"parent": f"{MOD}:block/boss_altar"})
+    write_json(os.path.join(bm, "shrine.json"), {"parent": "minecraft:block/cube_bottom_top", "textures": {
+        "top": f"{MOD}:block/shrine_top", "side": f"{MOD}:block/shrine_side", "bottom": f"{MOD}:block/shrine_bottom"}})
+    write_json(os.path.join(bs, "shrine.json"), {"variants": {"": {"model": f"{MOD}:block/shrine"}}})
+    write_json(os.path.join(im, "shrine.json"), {"parent": f"{MOD}:block/shrine"})
 
     for i in GENERATED_ITEMS:
         write_json(os.path.join(im, i + ".json"), {"parent": "minecraft:item/generated", "textures": {"layer0": f"{MOD}:item/{i}"}})
@@ -609,6 +670,8 @@ def gen_recipes():
     cooking("soul_shard_from_smelting_ore", "smelting", "soulstone_ore", "soul_shard", 1.0, 200)
     shaped("quest_board", ["PPP", "PBP", "PPP"], {"P": "minecraft:oak_planks", "B": "minecraft:book"}, "quest_board")
     shaped("catacomb_key", [" S ", "SAS", " G "], {"S": "soul_shard", "A": "adamantite_ingot", "G": "minecraft:gold_ingot"}, "catacomb_key")
+    shaped("shrine", ["GAG", "SCS", "SSS"], {"G": "minecraft:gold_ingot", "A": "minecraft:amethyst_shard",
+                                              "C": "minecraft:candle", "S": "minecraft:stone_bricks"}, "shrine")
     shaped("rebirth_tome", [" S ", "SBS", " D "], {"S": "soul_shard", "B": "minecraft:book", "D": "minecraft:diamond"}, "rebirth_tome")
     # Quadro de missões aceita qualquer tábua (tag)
     p = os.path.join(DATA, "recipe", "quest_board.json")
@@ -657,7 +720,7 @@ def gen_loot():
     write_json(os.path.join(lt, "blocks", "deepslate_mithril_ore.json"), ore_loot("deepslate_mithril_ore", "raw_mithril"))
     write_json(os.path.join(lt, "blocks", "adamantite_ore.json"), ore_loot("adamantite_ore", "raw_adamantite"))
     write_json(os.path.join(lt, "blocks", "soulstone_ore.json"), ore_loot("soulstone_ore", "soul_shard", 1, 2))
-    for b in ["mithril_block", "adamantite_block", "quest_board"]:
+    for b in ["mithril_block", "adamantite_block", "quest_board", "shrine"]:
         write_json(os.path.join(lt, "blocks", b + ".json"), self_loot(b))
 
     room = {"type": "minecraft:chest", "pools": [
@@ -700,12 +763,18 @@ def tag(path, values):
 def gen_tags():
     m = lambda *xs: [f"{MOD}:{x}" for x in xs]
     tb = os.path.join(MCDATA, "tags", "block")
-    tag(os.path.join(tb, "mineable", "pickaxe.json"), m("mithril_ore", "deepslate_mithril_ore", "adamantite_ore", "soulstone_ore", "mithril_block", "adamantite_block"))
+    tag(os.path.join(tb, "mineable", "pickaxe.json"), m("mithril_ore", "deepslate_mithril_ore", "adamantite_ore", "soulstone_ore", "mithril_block", "adamantite_block", "shrine"))
     tag(os.path.join(tb, "mineable", "axe.json"), m("quest_board"))
     tag(os.path.join(tb, "needs_iron_tool.json"), m("mithril_ore", "deepslate_mithril_ore", "soulstone_ore", "mithril_block"))
     tag(os.path.join(tb, "needs_diamond_tool.json"), m("adamantite_ore", "adamantite_block"))
     tag(os.path.join(tb, "dragon_immune.json"), m("boss_altar"))
     tag(os.path.join(tb, "wither_immune.json"), m("boss_altar"))
+
+    # Tags de convenção (usadas pela profissão Mineração e por outros mods)
+    cdata = os.path.join(ROOT, "data", "c", "tags")
+    tag(os.path.join(cdata, "block", "ores.json"), m("mithril_ore", "deepslate_mithril_ore", "adamantite_ore", "soulstone_ore"))
+    tag(os.path.join(cdata, "item", "ores.json"), m("mithril_ore", "deepslate_mithril_ore", "adamantite_ore", "soulstone_ore"))
+    tag(os.path.join(cdata, "item", "ingots.json"), m("mithril_ingot", "adamantite_ingot"))
 
     ti = os.path.join(MCDATA, "tags", "item")
     tag(os.path.join(ti, "swords.json"), m("mithril_sword", "adamantite_sword", "flamebrand", "frostfang", "soulreaper", "stormbreaker"))

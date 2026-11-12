@@ -45,6 +45,10 @@ public final class RpgHud {
 
         // Recargas
         y += 10;
+        int points = com.europa.rpg.talent.Talents.availablePoints(ClientRpgState.full);
+        if (points > 0 && ClientRpgState.full.hasClass()) {
+            ctx.drawTextWithShadow(tr, Text.translatable("rpg.europa.hud.points", points), x, y + 16, 0xFFFFD27F);
+        }
         ability(ctx, tr, x, y, "R", ClientRpgState.primaryCd, d.primaryCdMax(), true);
         ability(ctx, tr, x + w / 2 + 2, y, "G", ClientRpgState.ultimateCd, d.ultimateCdMax(), !"none".equals(d.subclass()));
     }

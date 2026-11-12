@@ -1,21 +1,28 @@
 package com.europa.rpg.command;
 
+import com.europa.rpg.blessing.Blessings;
+import com.europa.rpg.blessing.Patron;
+import com.europa.rpg.profession.Profession;
+import com.europa.rpg.profession.Professions;
 import com.europa.rpg.quest.QuestManager;
 import com.europa.rpg.quest.Quests;
 import com.europa.rpg.rpg.Messages;
 import com.europa.rpg.rpg.PlayerRpgData;
 import com.europa.rpg.rpg.Progression;
+import com.europa.rpg.rpg.RpgActions;
 import com.europa.rpg.rpg.RpgAttachments;
 import com.europa.rpg.rpg.RpgClass;
 import com.europa.rpg.rpg.RpgSubclass;
+import com.europa.rpg.talent.TalentNode;
+import com.europa.rpg.talent.Talents;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -32,36 +39,33 @@ public final class RpgCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("europa")
                 .then(literal("class")
-                        .executes(ctx -> { Messages.sendClassChoice(ctx.getSource().getPlayerOrThrow()); return 1; })
+                        .executes(ctx -> { Messages.sendClassChoice(p(ctx)); return 1; })
                         .then(argument("class", StringArgumentType.word())
-                                .suggests((c, b) -> CommandSource.suggestMatching(Arrays.stream(RpgClass.values())
-                                        .filter(x -> x != RpgClass.NONE).map(RpgClass::id), b))
-                                .executes(RpgCommand::chooseClass)))
+                                .suggests((c, b) -> CommandSource.suggestMatching(RpgClass.all().stream().map(RpgClass::id), b))
+                                .executes(ctx -> bool(RpgActions.chooseClass(p(ctx), StringArgumentType.getString(ctx, "class"))))))
                 .then(literal("subclass")
-                        .executes(ctx -> {
-                            ServerPlayerEntity p = ctx.getSource().getPlayerOrThrow();
-                            Messages.sendSubclassChoice(p, RpgAttachments.get(p));
-                            return 1;
-                        })
+                        .executes(ctx -> { Messages.sendSubclassChoice(p(ctx), RpgAttachments.get(p(ctx))); return 1; })
                         .then(argument("subclass", StringArgumentType.word())
-                                .suggests((c, b) -> {
-                                    PlayerRpgData d = RpgAttachments.get(c.getSource().getPlayerOrThrow());
-                                    return CommandSource.suggestMatching(Arrays.stream(d.rpgClass.subclasses()).map(RpgSubclass::id), b);
-                                })
-                                .executes(RpgCommand::chooseSubclass)))
+                                .suggests((c, b) -> CommandSource.suggestMatching(
+                                        RpgAttachments.get(c.getSource().getPlayerOrThrow()).rpgClass.subclasses().stream().map(RpgSubclass::id), b))
+                                .executes(ctx -> bool(RpgActions.chooseSubclass(p(ctx), StringArgumentType.getString(ctx, "subclass"))))))
+                .then(literal("talent").then(argument("talent", StringArgumentType.word())
+                        .suggests((c, b) -> CommandSource.suggestMatching(Talents.all().stream().map(TalentNode::id), b))
+                        .executes(ctx -> bool(RpgActions.unlockTalent(p(ctx), StringArgumentType.getString(ctx, "talent"))))))
+                .then(literal("patron").then(argument("patron", StringArgumentType.word())
+                        .suggests((c, b) -> CommandSource.suggestMatching(Patron.all().stream().map(Patron::id), b))
+                        .executes(ctx -> bool(Blessings.pledge(p(ctx), StringArgumentType.getString(ctx, "patron"))))))
                 .then(literal("stats").executes(RpgCommand::stats))
                 .then(literal("quest")
-                        .executes(ctx -> { QuestManager.showBoard(ctx.getSource().getPlayerOrThrow()); return 1; })
+                        .executes(ctx -> { QuestManager.showBoard(p(ctx)); return 1; })
                         .then(literal("accept").then(questArg().executes(ctx -> bool(QuestManager.accept(p(ctx), q(ctx))))))
                         .then(literal("abandon").then(questArg().executes(ctx -> bool(QuestManager.abandon(p(ctx), q(ctx))))))
                         .then(literal("turnin").then(questArg().executes(ctx -> bool(QuestManager.turnIn(p(ctx), q(ctx)))))))
                 .then(literal("admin").requires(s -> s.hasPermissionLevel(2))
                         .then(literal("addxp").then(argument("target", EntityArgumentType.player())
                                 .then(argument("amount", IntegerArgumentType.integer(1)).executes(ctx -> {
-                                    ServerPlayerEntity t = EntityArgumentType.getPlayer(ctx, "target");
-                                    Progression.addXp(t, IntegerArgumentType.getInteger(ctx, "amount"));
-                                    ctx.getSource().sendFeedback(() -> Text.literal("OK"), true);
-                                    return 1;
+                                    Progression.addXp(EntityArgumentType.getPlayer(ctx, "target"), IntegerArgumentType.getInteger(ctx, "amount"));
+                                    return ok(ctx);
                                 }))))
                         .then(literal("setlevel").then(argument("target", EntityArgumentType.player())
                                 .then(argument("level", IntegerArgumentType.integer(1, Progression.MAX_LEVEL)).executes(ctx -> {
@@ -71,21 +75,40 @@ public final class RpgCommand {
                                     d.xp = 0;
                                     Progression.applyAttributes(t);
                                     Progression.sync(t);
-                                    ctx.getSource().sendFeedback(() -> Text.literal("OK"), true);
-                                    return 1;
+                                    return ok(ctx);
+                                }))))
+                        .then(literal("profxp").then(argument("target", EntityArgumentType.player())
+                                .then(argument("profession", StringArgumentType.word())
+                                        .suggests((c, b) -> CommandSource.suggestMatching(Arrays.stream(Profession.values()).map(Profession::id), b))
+                                        .then(argument("amount", IntegerArgumentType.integer(1)).executes(ctx -> {
+                                            Profession prof = Profession.byId(StringArgumentType.getString(ctx, "profession"));
+                                            if (prof == null) return 0;
+                                            Professions.addXp(EntityArgumentType.getPlayer(ctx, "target"), prof, IntegerArgumentType.getInteger(ctx, "amount"));
+                                            return ok(ctx);
+                                        })))))
+                        .then(literal("setfavor").then(argument("target", EntityArgumentType.player())
+                                .then(argument("favor", IntegerArgumentType.integer(0, Patron.MAX_FAVOR)).executes(ctx -> {
+                                    ServerPlayerEntity t = EntityArgumentType.getPlayer(ctx, "target");
+                                    RpgAttachments.get(t).favor = IntegerArgumentType.getInteger(ctx, "favor");
+                                    Progression.applyAttributes(t);
+                                    return ok(ctx);
                                 }))))
                         .then(literal("reset").then(argument("target", EntityArgumentType.player()).executes(ctx -> {
                             ServerPlayerEntity t = EntityArgumentType.getPlayer(ctx, "target");
                             t.setAttached(RpgAttachments.PLAYER_DATA, new PlayerRpgData());
                             Progression.applyAttributes(t);
                             Progression.sync(t);
-                            ctx.getSource().sendFeedback(() -> Text.literal("OK"), true);
-                            return 1;
+                            return ok(ctx);
                         })))));
     }
 
-    private static com.mojang.brigadier.builder.RequiredArgumentBuilder<ServerCommandSource, String> questArg() {
-        return CommandManager.argument("quest", StringArgumentType.word())
+    private static int ok(CommandContext<ServerCommandSource> ctx) {
+        ctx.getSource().sendFeedback(() -> Text.literal("OK"), true);
+        return 1;
+    }
+
+    private static RequiredArgumentBuilder<ServerCommandSource, String> questArg() {
+        return argument("quest", StringArgumentType.word())
                 .suggests((c, b) -> CommandSource.suggestMatching(Quests.ALL.keySet(), b));
     }
 
@@ -101,62 +124,17 @@ public final class RpgCommand {
         return b ? 1 : 0;
     }
 
-    private static int chooseClass(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        ServerPlayerEntity p = ctx.getSource().getPlayerOrThrow();
-        PlayerRpgData d = RpgAttachments.get(p);
-        RpgClass c = RpgClass.byId(StringArgumentType.getString(ctx, "class"));
-        if (c == RpgClass.NONE) {
-            p.sendMessage(Text.translatable("rpg.europa.unknown_class").formatted(Formatting.RED));
-            return 0;
-        }
-        if (d.hasClass()) {
-            p.sendMessage(Text.translatable("rpg.europa.already_class").formatted(Formatting.RED));
-            return 0;
-        }
-        d.rpgClass = c;
-        d.subclass = RpgSubclass.NONE;
-        d.mana = Progression.maxMana(d);
-        Progression.applyAttributes(p);
-        p.setHealth(p.getMaxHealth());
-        Progression.sync(p);
-        p.sendMessage(Text.translatable("rpg.europa.class_chosen", Text.translatable(c.translationKey()).formatted(c.color)).formatted(Formatting.GOLD));
-        p.sendMessage(Text.translatable("rpg.europa.controls").formatted(Formatting.GRAY));
-        if (d.level >= Progression.SUBCLASS_LEVEL) Messages.sendSubclassChoice(p, d);
-        return 1;
-    }
-
-    private static int chooseSubclass(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        ServerPlayerEntity p = ctx.getSource().getPlayerOrThrow();
-        PlayerRpgData d = RpgAttachments.get(p);
-        RpgSubclass s = RpgSubclass.byId(StringArgumentType.getString(ctx, "subclass"));
-        if (s == RpgSubclass.NONE || s.parent != d.rpgClass) {
-            p.sendMessage(Text.translatable("rpg.europa.unknown_subclass").formatted(Formatting.RED));
-            return 0;
-        }
-        if (d.subclass != RpgSubclass.NONE) {
-            p.sendMessage(Text.translatable("rpg.europa.already_subclass").formatted(Formatting.RED));
-            return 0;
-        }
-        if (d.level < Progression.SUBCLASS_LEVEL) {
-            p.sendMessage(Text.translatable("rpg.europa.no_subclass", Progression.SUBCLASS_LEVEL).formatted(Formatting.RED));
-            return 0;
-        }
-        d.subclass = s;
-        Progression.applyAttributes(p);
-        Progression.sync(p);
-        p.sendMessage(Text.translatable("rpg.europa.subclass_chosen", Text.translatable(s.translationKey()).formatted(s.color)).formatted(Formatting.LIGHT_PURPLE));
-        return 1;
-    }
-
     private static int stats(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        ServerPlayerEntity p = ctx.getSource().getPlayerOrThrow();
+        ServerPlayerEntity p = p(ctx);
         PlayerRpgData d = RpgAttachments.get(p);
         p.sendMessage(Text.translatable("rpg.europa.stats.header").formatted(Formatting.GOLD, Formatting.BOLD));
         p.sendMessage(Text.translatable("rpg.europa.stats.class", Text.translatable(d.rpgClass.translationKey()).formatted(d.rpgClass.color),
                 Text.translatable(d.subclass.translationKey()).formatted(d.subclass.color)));
         p.sendMessage(Text.translatable("rpg.europa.stats.level", d.level, d.xp, Progression.xpForNextLevel(d.level)));
         p.sendMessage(Text.translatable("rpg.europa.stats.mana", (int) d.mana, (int) Progression.maxMana(d)));
+        p.sendMessage(Text.translatable("rpg.europa.stats.talents", Talents.availablePoints(d)));
         p.sendMessage(Text.translatable("rpg.europa.stats.quests", d.completedQuests.size(), Quests.ALL.size()));
+        p.sendMessage(Text.translatable("rpg.europa.open_screen_hint").formatted(Formatting.GRAY));
         return 1;
     }
 }

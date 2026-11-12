@@ -21,15 +21,15 @@ public final class Messages {
 
     public static void sendClassChoice(ServerPlayerEntity player) {
         player.sendMessage(Text.translatable("rpg.europa.choose_class").formatted(Formatting.GOLD, Formatting.BOLD));
-        for (RpgClass c : RpgClass.values()) {
-            if (c == RpgClass.NONE) continue;
+        player.sendMessage(Text.translatable("rpg.europa.open_screen_hint").formatted(Formatting.GRAY));
+        for (RpgClass c : RpgClass.all()) {
+            String ability = "rpg.europa.ability." + c.primaryAbility;
             MutableText hover = Text.translatable(c.translationKey() + ".desc").append("\n")
                     .append(Text.translatable("rpg.europa.ability_label").formatted(Formatting.YELLOW))
-                    .append(Text.translatable(c.abilityKey())).append("\n")
-                    .append(Text.translatable(c.abilityKey() + ".desc").formatted(Formatting.GRAY));
+                    .append(Text.translatable(ability)).append("\n")
+                    .append(Text.translatable(ability + ".desc").formatted(Formatting.GRAY));
             player.sendMessage(Text.literal("  ").append(button(Text.translatable(c.translationKey()),
-                    "/europa class " + c.id(), hover, c.color)).append(" ")
-                    .append(Text.translatable(c.translationKey() + ".desc").formatted(Formatting.GRAY)));
+                    "/europa class " + c.id(), hover, c.color)));
         }
     }
 
@@ -38,8 +38,8 @@ public final class Messages {
         for (RpgSubclass s : d.rpgClass.subclasses()) {
             MutableText hover = Text.translatable(s.translationKey() + ".desc").append("\n")
                     .append(Text.translatable("rpg.europa.ultimate_label").formatted(Formatting.YELLOW))
-                    .append(Text.translatable(s.abilityKey())).append("\n")
-                    .append(Text.translatable(s.abilityKey() + ".desc").formatted(Formatting.GRAY));
+                    .append(Text.translatable("rpg.europa.ability." + s.ultimateAbility)).append("\n")
+                    .append(Text.translatable("rpg.europa.ability." + s.ultimateAbility + ".desc").formatted(Formatting.GRAY));
             player.sendMessage(Text.literal("  ").append(button(Text.translatable(s.translationKey()),
                     "/europa subclass " + s.id(), hover, s.color)).append(" ")
                     .append(Text.translatable(s.translationKey() + ".desc").formatted(Formatting.GRAY)));

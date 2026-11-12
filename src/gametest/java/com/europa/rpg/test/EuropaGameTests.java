@@ -78,9 +78,11 @@ public class EuropaGameTests implements FabricGameTest {
         ServerPlayerEntity p = player(ctx);
         PlayerRpgData d = RpgAttachments.get(p);
         d.level = 20;
-        for (RpgSubclass sub : RpgSubclass.values()) {
-            if (sub == RpgSubclass.NONE) continue;
+        ctx.assertTrue(RpgClass.all().size() == 12 && RpgSubclass.all().size() == 24, "esperadas 12 classes e 24 subclasses");
+        for (RpgSubclass sub : RpgSubclass.all()) {
+            ctx.getWorld().getEntitiesByClass(ZombieEntity.class, p.getBoundingBox().expand(60), e -> true).forEach(e -> e.discard());
             ZombieEntity zombie = ctx.spawnMob(EntityType.ZOMBIE, new BlockPos(4, 1, 4));
+            ctx.spawnMob(EntityType.ZOMBIE, new BlockPos(5, 1, 3)).setAiDisabled(true);
             zombie.setAiDisabled(true);
             p.lookAt(net.minecraft.command.argument.EntityAnchorArgumentType.EntityAnchor.EYES, zombie.getEyePos());
             d.rpgClass = sub.parent;
@@ -149,6 +151,95 @@ public class EuropaGameTests implements FabricGameTest {
         ctx.useBlock(altar, p);
         ctx.assertTrue(ctx.getWorld().getEntitiesByType(ModEntities.CATACOMB_LORD, e -> true).size() == 1, "invocou chefe duplicado");
         boss.discard();
+        ctx.complete();
+    }
+
+    @GameTest(templateName = EMPTY_STRUCTURE)
+    public void talentTreeRules(TestContext ctx) {
+        ServerPlayerEntity p = player(ctx);
+        PlayerRpgData d = RpgAttachments.get(p);
+        ctx.assertFalse(com.europa.rpg.rpg.RpgActions.unlockTalent(p, "vigor"), "talento sem classe deveria falhar");
+        run(p, "europa class monk");
+        ctx.assertFalse(com.europa.rpg.rpg.RpgActions.unlockTalent(p, "vigor"), "talento sem pontos deveria falhar (nível 1)");
+        d.level = 20; // 19 pontos
+        com.europa.rpg.rpg.Progression.applyAttributes(p);
+        ctx.assertFalse(com.europa.rpg.rpg.RpgActions.unlockTalent(p, "iron_skin"), "tier 2 sem tier 1 deveria falhar");
+        float before = p.getMaxHealth();
+        for (int i = 0; i < 5; i++) ctx.assertTrue(com.europa.rpg.rpg.RpgActions.unlockTalent(p, "vigor"), "vigor rank " + (i + 1));
+        ctx.assertFalse(com.europa.rpg.rpg.RpgActions.unlockTalent(p, "vigor"), "rank acima do máximo");
+        ctx.assertTrue(p.getMaxHealth() == before + 10, "vigor 5 deveria dar +10 de vida: " + before + " -> " + p.getMaxHealth());
+        ctx.assertTrue(com.europa.rpg.rpg.RpgActions.unlockTalent(p, "iron_skin"), "tier 2 após tier 1");
+        com.europa.rpg.rpg.RpgActions.unlockTalent(p, "steadfast");
+        com.europa.rpg.rpg.RpgActions.unlockTalent(p, "second_wind");
+        ctx.assertTrue(com.europa.rpg.talent.Talents.pointsInBranch(d, com.europa.rpg.talent.TalentNode.Branch.DEFENSE) == 8, "8 pontos em defesa");
+        ctx.assertFalse(com.europa.rpg.rpg.RpgActions.unlockTalent(p, "last_stand"), "capstone exige 10 pontos no ramo");
+        com.europa.rpg.rpg.RpgActions.unlockTalent(p, "iron_skin");
+        com.europa.rpg.rpg.RpgActions.unlockTalent(p, "iron_skin");
+        ctx.assertTrue(com.europa.rpg.rpg.RpgActions.unlockTalent(p, "last_stand"), "capstone com 10 pontos");
+        ctx.assertTrue(com.europa.rpg.talent.Talents.availablePoints(d) == 19 - 11, "pontos restantes");
+
+        // Celeridade reduz recarga efetiva
+        d.talents.put("celerity", 5);
+        var def = com.europa.rpg.ability.Abilities.get(d.rpgClass.primaryAbility);
+        ctx.assertTrue(com.europa.rpg.ability.AbilityHandler.effectiveCooldown(d, def) < def.cooldown(), "celeridade deveria reduzir a recarga");
+
+        // Última Resistência impede a morte uma vez
+        p.setHealth(1f);
+        boolean died = net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.ALLOW_DEATH.invoker()
+                .allowDeath(p, p.getDamageSources().generic(), 100f);
+        ctx.assertFalse(died, "Última Resistência deveria impedir a morte");
+        ctx.assertTrue(p.getHealth() == 4f, "vida após Última Resistência deveria ser 4");
+        ctx.assertTrue(net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.ALLOW_DEATH.invoker()
+                .allowDeath(p, p.getDamageSources().generic(), 100f), "segunda morte dentro da recarga deveria ser permitida");
+        ctx.complete();
+    }
+
+    @GameTest(templateName = EMPTY_STRUCTURE)
+    public void blessingsAndOfferings(TestContext ctx) {
+        ServerPlayerEntity p = player(ctx);
+        PlayerRpgData d = RpgAttachments.get(p);
+        ctx.assertFalse(com.europa.rpg.blessing.Blessings.pledge(p, "thalor"), "jurar longe do santuário deveria falhar");
+        ctx.setBlockState(new BlockPos(2, 1, 2), ModBlocks.SHRINE.getDefaultState());
+        ctx.assertTrue(com.europa.rpg.blessing.Blessings.pledge(p, "thalor"), "jurar perto do santuário");
+        ctx.assertTrue(com.europa.rpg.blessing.Blessings.tierOf(d) == 1, "tier inicial 1");
+        float armorBefore = (float) p.getArmor();
+        ctx.assertFalse(com.europa.rpg.blessing.Blessings.offer(p, new ItemStack(net.minecraft.item.Items.WHEAT), false), "oferenda errada deveria ser rejeitada");
+        ItemStack diamonds = new ItemStack(net.minecraft.item.Items.DIAMOND, 10);
+        ctx.assertTrue(com.europa.rpg.blessing.Blessings.offer(p, diamonds, true), "oferenda de diamantes");
+        ctx.assertTrue(d.favor == 150, "favor esperado 150, obtido " + d.favor);
+        ctx.assertTrue(com.europa.rpg.blessing.Blessings.tierOf(d) == 2, "tier 2 com 150 de favor");
+        ctx.assertTrue(p.getArmor() >= armorBefore + 2, "tier 2 de Thalor deveria dar +2 de armadura");
+        com.europa.rpg.blessing.Blessings.tick(p, d, 20);
+        ctx.assertTrue(p.hasStatusEffect(net.minecraft.entity.effect.StatusEffects.HASTE), "Thalor tier 1 deveria dar Pressa");
+        // Trocar de patrono zera o favor
+        ctx.assertTrue(com.europa.rpg.blessing.Blessings.pledge(p, "kaelith"), "troca de patrono");
+        ctx.assertTrue(d.favor == 0 && "kaelith".equals(d.patron), "troca deveria zerar o favor");
+        ctx.complete();
+    }
+
+    @GameTest(templateName = EMPTY_STRUCTURE)
+    public void professionsAndSync(TestContext ctx) {
+        ServerPlayerEntity p = player(ctx);
+        PlayerRpgData d = RpgAttachments.get(p);
+        var mining = com.europa.rpg.profession.Profession.MINING;
+        com.europa.rpg.profession.Professions.addXp(p, mining, com.europa.rpg.profession.Profession.xpForNext(1) + com.europa.rpg.profession.Profession.xpForNext(2));
+        ctx.assertTrue(com.europa.rpg.profession.Professions.level(d, mining) == 3, "mineração deveria estar no nível 3");
+
+        // Poção marcada pelo suporte de poções rende XP de alquimia apenas uma vez
+        ItemStack potion = net.minecraft.component.type.PotionContentsComponent.createStack(net.minecraft.item.Items.POTION, net.minecraft.potion.Potions.SWIFTNESS);
+        com.europa.rpg.profession.BrewMarker.mark(potion);
+        ctx.assertTrue(com.europa.rpg.profession.BrewMarker.consume(potion), "marca deveria existir");
+        ctx.assertFalse(com.europa.rpg.profession.BrewMarker.consume(potion), "marca deveria ser consumida");
+
+        // Ida e volta do codec usado na sincronização completa
+        run(p, "europa class bard");
+        d.talents.put("flow", 3);
+        d.patron = "ysmera";
+        d.favor = 321;
+        var nbt = PlayerRpgData.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, d).getOrThrow();
+        PlayerRpgData back = PlayerRpgData.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, nbt).getOrThrow();
+        ctx.assertTrue(back.rpgClass == RpgClass.BARD && back.talents.get("flow") == 3 && back.favor == 321
+                && "ysmera".equals(back.patron) && back.profLevels.get("mining") == 3, "codec não preservou o estado");
         ctx.complete();
     }
 }

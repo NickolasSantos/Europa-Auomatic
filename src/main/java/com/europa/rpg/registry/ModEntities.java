@@ -2,6 +2,7 @@ package com.europa.rpg.registry;
 
 import com.europa.rpg.EuropaRPG;
 import com.europa.rpg.entity.CatacombLordEntity;
+import com.europa.rpg.entity.ServantEntity;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
@@ -17,9 +18,17 @@ public final class ModEntities {
                     .maxTrackingRange(10)
                     .build("catacomb_lord"));
 
+    public static final EntityType<ServantEntity> SERVANT = Registry.register(Registries.ENTITY_TYPE,
+            EuropaRPG.id("servant"),
+            EntityType.Builder.create(ServantEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.6f, 1.95f)
+                    .maxTrackingRange(8)
+                    .build("servant"));
+
     private ModEntities() {}
 
     public static void init() {
         FabricDefaultAttributeRegistry.register(CATACOMB_LORD, CatacombLordEntity.createAttributes());
+        FabricDefaultAttributeRegistry.register(SERVANT, ServantEntity.createAttributes());
     }
 }
