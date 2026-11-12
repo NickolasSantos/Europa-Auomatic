@@ -57,6 +57,11 @@ public final class Professions {
         };
     }
 
+    /** Sorte extra concedida pela Pesca (aplicada como atributo). */
+    public static double fishingLuck(PlayerRpgData d) {
+        return 0.04 * (level(d, Profession.FISHING) - 1);
+    }
+
     public static void addXp(ServerPlayerEntity player, Profession p, int amount) {
         if (amount <= 0) return;
         PlayerRpgData d = RpgAttachments.get(player);

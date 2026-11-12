@@ -16,13 +16,13 @@ public final class RpgSubclass {
     public static final RpgSubclass PALADIN = reg("paladin", RpgClass.WARRIOR, Formatting.YELLOW, "divine_shield", StatBlock.builder().health(4, 0).armor(4, 0).build());
     public static final RpgSubclass PYROMANCER = reg("pyromancer", RpgClass.MAGE, Formatting.GOLD, "meteor", StatBlock.builder().mana(50, 0).build());
     public static final RpgSubclass CRYOMANCER = reg("cryomancer", RpgClass.MAGE, Formatting.BLUE, "blizzard", StatBlock.builder().mana(50, 0).armor(2, 0).build());
-    public static final RpgSubclass ASSASSIN = reg("assassin", RpgClass.ROGUE, Formatting.DARK_GRAY, "death_mark", StatBlock.builder().damage(1.5, 0).build());
+    public static final RpgSubclass ASSASSIN = reg("assassin", RpgClass.ROGUE, Formatting.GRAY, "death_mark", StatBlock.builder().damage(1.5, 0).build());
     public static final RpgSubclass SHADOWDANCER = reg("shadowdancer", RpgClass.ROGUE, Formatting.DARK_PURPLE, "smoke_bomb", StatBlock.builder().speed(0.01).build());
     public static final RpgSubclass SNIPER = reg("sniper", RpgClass.RANGER, Formatting.DARK_AQUA, "piercing_shot", StatBlock.builder().damage(1, 0).build());
     public static final RpgSubclass BEASTMASTER = reg("beastmaster", RpgClass.RANGER, Formatting.DARK_GREEN, "call_of_the_pack", StatBlock.builder().health(4, 0).build());
     public static final RpgSubclass HIEROPHANT = reg("hierophant", RpgClass.CLERIC, Formatting.WHITE, "sanctuary", StatBlock.builder().mana(40, 0).health(2, 0).build());
     public static final RpgSubclass INQUISITOR = reg("inquisitor", RpgClass.CLERIC, Formatting.GOLD, "judgment", StatBlock.builder().damage(1.5, 0).armor(2, 0).build());
-    public static final RpgSubclass LEGION_LORD = reg("legion_lord", RpgClass.NECROMANCER, Formatting.DARK_GRAY, "unholy_legion", StatBlock.builder().mana(40, 0).build());
+    public static final RpgSubclass LEGION_LORD = reg("legion_lord", RpgClass.NECROMANCER, Formatting.GRAY, "unholy_legion", StatBlock.builder().mana(40, 0).build());
     public static final RpgSubclass HEMOMANCER = reg("hemomancer", RpgClass.NECROMANCER, Formatting.DARK_RED, "blood_pact", StatBlock.builder().health(4, 0).build());
     public static final RpgSubclass SHAPESHIFTER = reg("shapeshifter", RpgClass.DRUID, Formatting.GOLD, "beast_form", StatBlock.builder().health(4, 0).damage(1, 0).build());
     public static final RpgSubclass GROVE_WARDEN = reg("grove_warden", RpgClass.DRUID, Formatting.GREEN, "ancestral_roots", StatBlock.builder().mana(40, 0).armor(2, 0).build());
@@ -35,7 +35,7 @@ public final class RpgSubclass {
     public static final RpgSubclass RUNEFORGER = reg("runeforger", RpgClass.RUNESMITH, Formatting.BLUE, "runic_armor", StatBlock.builder().armor(4, 0).build());
     public static final RpgSubclass ARCANE_ARCHITECT = reg("arcane_architect", RpgClass.RUNESMITH, Formatting.AQUA, "rune_turret", StatBlock.builder().mana(40, 0).build());
     public static final RpgSubclass ASTRAL_WANDERER = reg("astral_wanderer", RpgClass.VOIDWEAVER, Formatting.LIGHT_PURPLE, "stellar_collapse", StatBlock.builder().mana(40, 0).build());
-    public static final RpgSubclass VOID_DEVOURER = reg("void_devourer", RpgClass.VOIDWEAVER, Formatting.DARK_BLUE, "devouring_rift", StatBlock.builder().health(4, 0).build());
+    public static final RpgSubclass VOID_DEVOURER = reg("void_devourer", RpgClass.VOIDWEAVER, Formatting.DARK_AQUA, "devouring_rift", StatBlock.builder().health(4, 0).build());
 
     public final String id;
     public final RpgClass parent;

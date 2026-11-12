@@ -380,7 +380,7 @@ PROFESSIONS = {
     "mining": ("Mineração", "Mining", "%s de chance de minério duplo; mineração mais rápida.", "%s chance of double ore; faster mining."),
     "woodcutting": ("Lenhador", "Woodcutting", "%s de chance de madeira dupla.", "%s chance of double logs."),
     "farming": ("Agricultura", "Farming", "%s de chance de colheita dupla.", "%s chance of double harvest."),
-    "fishing": ("Pesca", "Fishing", "Sorte aumentada na pesca (%s).", "Increased fishing luck (%s)."),
+    "fishing": ("Pesca", "Fishing", "%s de sorte na pesca (melhores capturas).", "%s fishing luck (better catches)."),
     "smithing": ("Ferraria", "Smithing", "%s de chance de forjar obra-prima (Inquebrável).", "%s chance to forge a masterwork (Unbreaking)."),
     "alchemy": ("Alquimia", "Alchemy", "%s de chance de poção extra.", "%s chance of an extra potion."),
 }

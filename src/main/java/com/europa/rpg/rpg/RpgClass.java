@@ -34,9 +34,9 @@ public final class RpgClass {
             StatBlock.builder().health(1, 0.3).speed(0.005).mana(30, 2).manaRegen(2.5f).build());
     public static final RpgClass ALCHEMIST = reg("alchemist", Formatting.DARK_AQUA, "volatile_flask", "minecraft:splash_potion",
             StatBlock.builder().health(1, 0.3).mana(30, 2).manaRegen(2f).build());
-    public static final RpgClass RUNESMITH = reg("runesmith", Formatting.BLUE, "explosive_rune", "europa:adamantite_ingot",
+    public static final RpgClass RUNESMITH = reg("runesmith", Formatting.GRAY, "explosive_rune", "europa:adamantite_ingot",
             StatBlock.builder().health(3, 0.4).armor(2, 0.08).mana(20, 2).manaRegen(2f).build());
-    public static final RpgClass VOIDWEAVER = reg("voidweaver", Formatting.DARK_BLUE, "void_rift", "minecraft:ender_eye",
+    public static final RpgClass VOIDWEAVER = reg("voidweaver", Formatting.BLUE, "void_rift", "minecraft:ender_eye",
             StatBlock.builder().health(0, 0.3).mana(50, 3).manaRegen(2.5f).speed(0.005).build());
 
     public final String id;

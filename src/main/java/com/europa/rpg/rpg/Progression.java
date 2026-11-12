@@ -111,7 +111,7 @@ public final class Progression {
         double damage = c.damage() + c.damagePerLevel() * lvl + s.damage() + Talents.total(d, TalentEffect.ATTACK_DAMAGE);
         double speed = c.speed() + s.speed();
         double attackSpeed = c.attackSpeed() + s.attackSpeed();
-        double luck = 0.04 * (Professions.level(d, Profession.FISHING) - 1);
+        double luck = Professions.fishingLuck(d);
         double breakSpeed = 0.004 * (Professions.level(d, Profession.MINING) - 1);
 
         if (Blessings.has(d, Patron.SOLENNE, 2)) health += 4;

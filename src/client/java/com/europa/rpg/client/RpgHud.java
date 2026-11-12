@@ -16,18 +16,19 @@ public final class RpgHud {
         RpgSyncPayload d = ClientRpgState.data;
         if (d == null || mc.options.hudHidden || mc.getDebugHud().shouldShowDebugHud()) return;
         TextRenderer tr = mc.textRenderer;
-        int x = 6, y = 6, w = 102;
+        int x = 6, y = 6, w = 110;
 
         if ("none".equals(d.rpgClass())) {
             ctx.drawTextWithShadow(tr, Text.translatable("rpg.europa.hud.no_class"), x, y, 0xFFAAAAAA);
             return;
         }
 
-        ctx.fill(x - 3, y - 3, x + w + 3, y + 50, 0x88000000);
         Text title = Text.translatable("rpg.europa.class." + d.rpgClass());
         if (!"none".equals(d.subclass())) {
             title = Text.translatable("rpg.europa.subclass." + d.subclass());
         }
+        w = Math.max(w, tr.getWidth(title) + tr.getWidth("Lv " + d.level()) + 10);
+        ctx.fill(x - 3, y - 3, x + w + 3, y + 50, 0x88000000);
         ctx.drawTextWithShadow(tr, title, x, y, 0xFFFFD27F);
         String lvl = "Lv " + d.level();
         ctx.drawTextWithShadow(tr, lvl, x + w - tr.getWidth(lvl), y, 0xFFFFFFFF);
@@ -50,7 +51,7 @@ public final class RpgHud {
             ctx.drawTextWithShadow(tr, Text.translatable("rpg.europa.hud.points", points), x, y + 16, 0xFFFFD27F);
         }
         ability(ctx, tr, x, y, "R", ClientRpgState.primaryCd, d.primaryCdMax(), true);
-        ability(ctx, tr, x + w / 2 + 2, y, "G", ClientRpgState.ultimateCd, d.ultimateCdMax(), !"none".equals(d.subclass()));
+        ability(ctx, tr, x + w - 48, y, "G", ClientRpgState.ultimateCd, d.ultimateCdMax(), !"none".equals(d.subclass()));
     }
 
     private static void bar(DrawContext ctx, int x, int y, int w, int h, float frac, int fg, int bg) {

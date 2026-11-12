@@ -366,7 +366,7 @@
   "rpg.europa.profession.farming": "Farming",
   "rpg.europa.profession.farming.perk": "%s chance of double harvest.",
   "rpg.europa.profession.fishing": "Fishing",
-  "rpg.europa.profession.fishing.perk": "Increased fishing luck (%s).",
+  "rpg.europa.profession.fishing.perk": "%s fishing luck (better catches).",
   "rpg.europa.profession.smithing": "Smithing",
   "rpg.europa.profession.smithing.perk": "%s chance to forge a masterwork (Unbreaking).",
   "rpg.europa.profession.alchemy": "Alchemy",
